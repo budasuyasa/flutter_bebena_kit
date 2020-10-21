@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bebena_kit/resources/images.dart';
+import 'package:flutter_bebena_kit/widgets/label.dart';
 
 typedef OnActionTap = void Function();
 
@@ -6,9 +8,10 @@ class EmptyPlaceholder extends StatelessWidget {
   EmptyPlaceholder({
     this.title = "Terjadi Kesalahan",
     @required this.message,
-    this.image,
+    this.image  = Images.sad,
     this.actionText,
-    this.onActionTap
+    this.onActionTap,
+    this.withCentered = true
   });
 
   final String title;
@@ -18,11 +21,14 @@ class EmptyPlaceholder extends StatelessWidget {
   final String actionText;
   final OnActionTap onActionTap;
 
+  /// Set placeholder with center depending of height
+  final bool withCentered;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height,
+      height: (withCentered) ? MediaQuery.of(context).size.height : null,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -32,10 +38,10 @@ class EmptyPlaceholder extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 16),
                 child: Image.asset(image, width: 60, height: 60, fit: BoxFit.contain)
               ),
-            Text(title, style: Theme.of(context).textTheme.subtitle1),
+            Label(title, type: LabelType.subtitle1, fontWeight: FontWeight.bold),
             SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyText1),
-            if (actionText != null)
+            Text(message, style: Theme.of(context).textTheme.bodyText2),
+            if (actionText != null && onActionTap != null)
               Container(
                 margin: const EdgeInsets.only(top: 16),
                 child: FlatButton(

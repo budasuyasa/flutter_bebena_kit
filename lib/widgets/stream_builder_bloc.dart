@@ -3,6 +3,7 @@ import 'package:flutter_bebena_kit/bloc/bloc.dart';
 import 'package:flutter_bebena_kit/widgets/empty_placeholder.dart';
 
 typedef StreamBuilderBlocCallback<T> = Widget Function(BuildContext, T, BlocStatus, String);
+typedef StreamBuilderBlocCustomError = Widget Function(String errorMessage);
 
 /// Stream Builder wrapper for Bloc
 /// 
@@ -18,7 +19,9 @@ class StreamBuilderBloc<T> extends StatelessWidget {
     @required this.stream,
     @required this.builder,
     this.customError,
-    this.disableLoading
+    this.disableLoading = false,
+    this.disableErrorScreen = false,
+    this.isInit = false
   });
 
   final Stream<BlocState<T>> stream;
@@ -27,13 +30,22 @@ class StreamBuilderBloc<T> extends StatelessWidget {
 
   /// Create [customError] screen, when its not null
   /// it will override default error
-  final Widget customError;
+  final StreamBuilderBlocCustomError customError;
 
   /// Disable loading when bloc status is [BlocStatus.loading],
   /// preventing to showing loading indicator,
   /// 
   /// suitable for Pagination list
   final bool disableLoading;
+
+  /// Disable full error screen when status is [BlocStatus.error]
+  final bool disableErrorScreen;
+
+  /// Disable loading indicator on [BlocStatus.init]
+  /// preventing to showing loading indicator
+  /// 
+  /// suitable for initial view data
+  final bool isInit;
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +59,11 @@ class StreamBuilderBloc<T> extends StatelessWidget {
         }
 
         if (snap.hasData) {
-          if (snap.data.status == BlocStatus.error) {
+          if (snap.data.status == BlocStatus.error && (!disableErrorScreen)) {
             if (customError == null) {
               return EmptyPlaceholder(message: snap.data.message);
             } else {
-              return customError;
+              return customError(snap.data.message ?? "Terjadi Kesalahan");
             }
           }
 
@@ -62,13 +74,26 @@ class StreamBuilderBloc<T> extends StatelessWidget {
             );
           }
 
-          return builder(context, snap.data.data, snap.data.status, snap.data.message);
+          print(snap.data.status);
+
+          if (snap.data == null) {
+            return Container(
+              height: MediaQuery.of(context).size.height / 2,
+              child: Center(child: CircularProgressIndicator())
+            );
+          } else {
+            return builder(context, snap.data.data, snap.data.status, snap.data.message);
+          }
         }
 
-        return Container(
-          height: MediaQuery.of(context).size.height / 2,
-          child: Center(child: CircularProgressIndicator())
-        );
+        if (isInit) {
+          return builder(context, null, BlocStatus.init, "");
+        } else {
+          return Container(
+            height: MediaQuery.of(context).size.height / 2,
+            child: Center(child: CircularProgressIndicator())
+          );
+        }
       },
     );
   }

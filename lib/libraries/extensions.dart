@@ -29,8 +29,32 @@ extension DateTimeFormatter on DateTime {
     String format = 'd MMMM y HH:mm',
     String locale = 'id_ID'
   }) {
-    var formatter = DateFormat(format, 'id_ID');
+    var formatter = DateFormat(format, locale);
     return formatter.format(this);
+  }
+
+  String toDateDifferenceInformation({
+    String locale = 'id_ID',
+    String format = 'd MMMM y HH:mm',
+  }) {
+    final now = DateTime.now();
+    
+    final difference = now.difference(this);
+    if (difference.inDays == 0) {
+      if (difference.inMinutes < 30) {
+        return "${difference.inMinutes} menit lalu";
+      } else {
+        // today
+        var formatter = DateFormat('HH:mm', locale);
+        return formatter.format(this);
+      }
+    } else if (difference.inDays > 0 && difference.inDays < 5) {
+      return "${difference.inDays} hari lalu";
+      // beberapa hari lalu
+    } else {
+      var formatter = DateFormat(format, locale);
+      return formatter.format(this);
+    }
   }
 }
 

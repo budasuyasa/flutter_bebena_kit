@@ -57,8 +57,12 @@ mixin OnInvalidToken {
   void onLogout(int statusCode, String message) {}
 }
 
+mixin OnNetworkError {
+  void onBadGateway() {}
+}
+
 abstract class BaseAPI {
-  BaseAPI(this.configurationAPI) {}
+  BaseAPI(this.configurationAPI);
 
   final ConfigurationAPI  configurationAPI;
 
@@ -92,7 +96,7 @@ abstract class BaseAPI {
     'version': configurationAPI.appVersion
   };
 
-    /// Simplified [http.Response] checking.
+  /// Simplified [http.Response] checking.
   /// 
   /// Jika status response == 200 maka parsing data dan check status
   /// jika kosong throw default [CustomException] 
@@ -137,7 +141,7 @@ abstract class BaseAPI {
     }
   }
 
-    /// Custom post to api using [httpDio.Dio]
+  /// Custom post to api using [httpDio.Dio]
   /// 
   /// path [url] will be concated to [URLs.BASE_API]
   /// 

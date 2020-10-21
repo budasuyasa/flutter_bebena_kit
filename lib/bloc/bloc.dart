@@ -34,6 +34,8 @@ class BlocState<T> {
   }
 }
 
+typedef RenderBody<T> = Future<T> Function();
+
 /// Base block/Parent bloc
 class Bloc<T> extends BaseBloc {
 
@@ -68,6 +70,27 @@ class Bloc<T> extends BaseBloc {
 
   /// Get success [BlocState] data when error
   BlocState<T> getError(String errorMessage) => BlocState<T>( status: BlocStatus.error, message: errorMessage );
+
+  /// Simplified body for code, for not much boiler plate
+  /// 
+  /// [body] is for function to required to run
+  /// 
+  /// example:
+  /// ```
+  /// runBloc(() async {
+  ///   final response = await apiGoesHere();
+  ///   return FormatingApiResponse.fromMap(response);
+  /// });
+  /// ```
+  void runBloc(RenderBody<T> body) async {
+    loading = "";
+    try {
+      final data = await body();
+      success = data;
+    } catch(e) {
+      error = e.toString();
+    }
+  }
 
 
   @mustCallSuper

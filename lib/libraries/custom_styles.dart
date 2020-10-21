@@ -15,4 +15,7 @@ class CustomStyles {
     BoxShadow(color: Colors.black.withOpacity(0.04), offset: Offset(2, 0), blurRadius: 6, spreadRadius: 0),
     BoxShadow(color: Colors.black.withOpacity(0.04), offset: Offset.zero, blurRadius: 1, spreadRadius: 0)
   ];
+
+  static BorderRadius borderRadius({ double withBorderRadius = 8 }) =>
+    BorderRadius.all(Radius.circular(withBorderRadius));
 }

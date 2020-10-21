@@ -4,16 +4,25 @@ import 'package:flutter_bebena_kit/exceptions/custom_exception.dart';
 import 'package:http/http.dart';
 
 class AuthAPI extends BaseAPI {
-  AuthAPI(ConfigurationAPI configurationAPI, this.accessToken) : super(configurationAPI);
+  AuthAPI(ConfigurationAPI configurationAPI, { this.accessToken }) : super(configurationAPI);
 
-  final String accessToken;
+  String accessToken;
 
   OnInvalidToken onInvalidTokenDelegate;
 
+  OnNetworkError onNetworkErrorDelegate;
+
   Map<String, String> _appendWithAuth(Map<String, String> map) {
-    map['Authorization']  = "Bearer $accessToken";
-    map['version']        = configurationAPI.appVersion;
-    return map;
+    if (map == null) {
+      return {
+        'Authorization': "Bearer $accessToken",
+        'version': configurationAPI.appVersion
+      };
+    } else {
+      map['Authorization']  = "Bearer $accessToken";
+      map['version']        = configurationAPI.appVersion;
+      return map;
+    }
   }
 
   @override
@@ -80,15 +89,16 @@ class AuthAPI extends BaseAPI {
 
   @override
   Map<String, dynamic> checkingResponse(Response response) {
-    if (onInvalidTokenDelegate != null) {
-      if (response.statusCode == 401) {
-        onInvalidTokenDelegate.onLogout(response.statusCode, "Logout");
-        return null;
-      } else {
-        return super.checkingResponse(response);
-      }
-    } else {
-      return super.checkingResponse(response);
+    if (onNetworkErrorDelegate != null && response.statusCode == 502) {
+      onNetworkErrorDelegate.onBadGateway();
+      return null;
     }
+
+    if (onInvalidTokenDelegate != null && response.statusCode == 401) {
+      onInvalidTokenDelegate.onLogout(response.statusCode, "Logout");
+      return null;
+    }
+
+    return super.checkingResponse(response);
   }
 }
