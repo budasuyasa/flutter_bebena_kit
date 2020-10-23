@@ -17,6 +17,7 @@ dependencies:
   intl:
   url_launcher: ^5.1.4
   cached_network_image: ^2.2.0+1
+  rxdart: ^0.24.1
 
 dev_dependencies:
   flutter_test:

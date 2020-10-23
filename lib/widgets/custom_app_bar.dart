@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bebena_kit/libraries/custom_styles.dart';
 import 'package:flutter_bebena_kit/libraries/helpers.dart';
 import 'package:flutter_bebena_kit/widgets/label.dart';
 
@@ -52,10 +53,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 class FloatingAppBar extends StatefulWidget {
   final ScrollController scrollController;
   final Widget title;
+  final bool withShadow;
+  final List<Widget> actions;
 
   FloatingAppBar({
     this.scrollController,
-    this.title
+    this.title,
+    this.withShadow = false,
+    this.actions
   }) : assert(scrollController != null, "Scroll Controller tidak boleh kosong!");
 
   @override
@@ -95,23 +100,34 @@ class _FloatingAppBarState extends State<FloatingAppBar> {
           value: darkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
           child: Container(
               decoration: BoxDecoration(
-                  color: bgColor
+                  color: bgColor,
+                  boxShadow: (_opacity == 1 && widget.withShadow) ? CustomStyles.mediumBoxShadow : []
               ),
               child: Container(
                   height: appbarHeight,
                   width: double.infinity,
                   child: SafeArea(
                     bottom: false,
-                    child: NavigationToolbar(
-                      leading: BackButton(
-                        color: Theme.of(context).accentColor,
-                      ),
-                      middle: Container(
-                        child: DefaultTextStyle(
-                          style: Theme.of(context).textTheme.headline6,
-                          child: AnimatedOpacity(opacity: _opacity, duration: Duration(milliseconds: 1), child: widget.title,),
-                        ),
-                      )
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: NavigationToolbar(
+                            leading: BackButton(
+                              color: Theme.of(context).accentColor,
+                            ),
+                            middle: Container(
+                              child: DefaultTextStyle(
+                                style: Theme.of(context).textTheme.headline6,
+                                child: AnimatedOpacity(opacity: _opacity, duration: Duration(milliseconds: 1), child: widget.title,),
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: widget.actions,
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                   )
               )

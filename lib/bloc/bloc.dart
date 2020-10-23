@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 
 enum BlocStatus {
   error,
@@ -12,7 +13,7 @@ enum BlocStatus {
   init
 }
 
-abstract class BaseBloc {
+abstract class BaseBloc<T> {
   void dispose();
 }
 
@@ -71,6 +72,8 @@ class Bloc<T> extends BaseBloc {
   /// Get success [BlocState] data when error
   BlocState<T> getError(String errorMessage) => BlocState<T>( status: BlocStatus.error, message: errorMessage );
 
+  void setStatusWithData(BlocStatus status, T data) => sink.add(BlocState<T>(status: status, message: "", data: data));
+
   /// Simplified body for code, for not much boiler plate
   /// 
   /// [body] is for function to required to run
@@ -106,30 +109,58 @@ class BlocBroadcast<T> extends BaseBloc {
   @mustCallSuper
   BlocBroadcast() { init(); }
 
-  @protected
-  StreamController _controller = StreamController<BlocState<T>>.broadcast();
-  Stream get stream => _controller.stream;
-  StreamSink get sink => _controller.sink;
+  BehaviorSubject<BlocState<T>> subject = BehaviorSubject<BlocState<T>>.seeded(BlocState<T>(status: BlocStatus.init, data: null));
 
-  void init() => _controller.add(BlocState<T>(status: BlocStatus.init, data: null));
+  Stream get stream => subject.stream;
+
+
+  // @protected
+  // StreamController _controller = StreamController<BlocState<T>>.broadcast();
+  // Stream get stream => _controller.stream;
+  // StreamSink get sink => _controller.sink;
+
+  void init() => subject.sink.add(BlocState<T>(status: BlocStatus.init, data: null));
 
   /// Set when [data] successfuly fetched
-  set success(T data) => sink.add(BlocState<T>( status: BlocStatus.success, data: data ));
+  set success(T data) => subject.sink.add(BlocState<T>( status: BlocStatus.success, data: data ));
 
-  set loadingData(T data) => sink.add(BlocState<T>( status: BlocStatus.loading, message: '', data: data ));
+  set loadingData(T data) => subject.sink.add(BlocState<T>( status: BlocStatus.loading, message: '', data: data ));
 
   /// Send [message] to stream when fetching is loading
-  set loading(String message) => sink.add(BlocState<T>( status: BlocStatus.loading, message: message ));
+  set loading(String message) => subject.sink.add(BlocState<T>( status: BlocStatus.loading, message: message ));
 
   /// Show [errorMessage] when operational fail
-  set error(String errorMessage) => sink.add(BlocState<T>( status: BlocStatus.error, message: errorMessage ));
+  set error(String errorMessage) => subject.sink.add(BlocState<T>( status: BlocStatus.error, message: errorMessage ));
 
-  void errorWithData(T data, String errorMessage) => sink.add(BlocState<T>( status: BlocStatus.error, message: errorMessage, data: data ));
+  void errorWithData(T data, String errorMessage) => subject.sink.add(BlocState<T>( status: BlocStatus.error, message: errorMessage, data: data ));
+
+  void setStatusWithData(BlocStatus status, T data) => subject.sink.add(BlocState<T>(status: status, message: "", data: data));
+
+  /// Simplified body for code, for not much boiler plate
+  /// 
+  /// [body] is for function to required to run
+  /// 
+  /// example:
+  /// ```
+  /// runBloc(() async {
+  ///   final response = await apiGoesHere();
+  ///   return FormatingApiResponse.fromMap(response);
+  /// });
+  /// ```
+  void runBloc(RenderBody<T> body) async {
+    loading = "";
+    try {
+      final data = await body();
+      success = data;
+    } catch(e) {
+      error = e.toString();
+    }
+  }
 
 
   @mustCallSuper
   @override
   void dispose() {
-    _controller.close();
+    subject.close();
   }
 }

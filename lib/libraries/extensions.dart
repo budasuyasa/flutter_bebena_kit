@@ -41,7 +41,9 @@ extension DateTimeFormatter on DateTime {
     
     final difference = now.difference(this);
     if (difference.inDays == 0) {
-      if (difference.inMinutes < 30) {
+      if (difference.inMinutes == 0) {
+        return "Baru Saja";
+      } else if (difference.inMinutes < 30) {
         return "${difference.inMinutes} menit lalu";
       } else {
         // today

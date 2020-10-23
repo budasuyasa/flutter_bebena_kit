@@ -26,7 +26,7 @@ class StreamBuilderBloc<T> extends StatelessWidget {
 
   final Stream<BlocState<T>> stream;
   
-  final StreamBuilderBlocCallback builder;
+  final StreamBuilderBlocCallback<T> builder;
 
   /// Create [customError] screen, when its not null
   /// it will override default error
@@ -59,6 +59,7 @@ class StreamBuilderBloc<T> extends StatelessWidget {
         }
 
         if (snap.hasData) {
+          if (disableLoading && snap.data == null) return Container();
           if (snap.data.status == BlocStatus.error && (!disableErrorScreen)) {
             if (customError == null) {
               return EmptyPlaceholder(message: snap.data.message);

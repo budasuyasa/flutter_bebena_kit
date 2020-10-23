@@ -40,7 +40,7 @@ class EmptyPlaceholder extends StatelessWidget {
               ),
             Label(title, type: LabelType.subtitle1, fontWeight: FontWeight.bold),
             SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyText2),
+            Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyText2),
             if (actionText != null && onActionTap != null)
               Container(
                 margin: const EdgeInsets.only(top: 16),

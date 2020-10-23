@@ -86,6 +86,7 @@ class BottomButton extends StatelessWidget {
             onPressed: disabled ? null : () => onPress(),
             disabledColor: Colors.grey.shade300,
             color: Theme.of(context).accentColor,
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: Label(title == null ? "" : title.toUpperCase(), type: LabelType.button, color: Colors.white),
           ),
         ),
