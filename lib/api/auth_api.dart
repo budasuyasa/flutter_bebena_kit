@@ -57,6 +57,20 @@ class AuthAPI extends BaseAPI {
     }
   }
 
+  Future<Map<String, dynamic>> deleteFromApi(String path, { Map<String, String> headers }) async {
+    headers = _appendWithAuth(headers);
+
+    try {
+      final response = await delete(
+        baseUrl(path),
+        headers: headers
+      );
+      return checkingResponse(response);
+    } catch (e) {
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+    }
+  }
+
   @override
   Future<Map<String, dynamic>> postToApiUsingDio(String url, {Map<String, dynamic> postParameters, Map<String, String> headers}) async {
     headers = _appendWithAuth(headers);

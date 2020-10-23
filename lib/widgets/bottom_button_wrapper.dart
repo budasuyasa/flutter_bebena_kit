@@ -7,12 +7,14 @@ class BottomButtonWrapper extends StatelessWidget {
   final String buttonTitle;
   final Function onButtonTap;
   final EdgeInsets padding;
+  final bool isLoading;
   
   BottomButtonWrapper({
     @required this.child,
     this.buttonTitle,
     this.onButtonTap,
-    this.padding
+    this.padding,
+    this.isLoading = false
   });
 
   @override
@@ -33,6 +35,7 @@ class BottomButtonWrapper extends StatelessWidget {
           BottomButton(
             title: buttonTitle,
             onPress: onButtonTap,
+            isLoading: isLoading,
           )
         ],
       ),
@@ -82,13 +85,13 @@ class BottomButton extends StatelessWidget {
         decoration: decoration,
         child: SafeArea(
           top: false,
-          child: MaterialButton(
+          child: (!isLoading) ? MaterialButton(
             onPressed: disabled ? null : () => onPress(),
             disabledColor: Colors.grey.shade300,
             color: Theme.of(context).accentColor,
             padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: Label(title == null ? "" : title.toUpperCase(), type: LabelType.button, color: Colors.white),
-          ),
+          ) : Center(child: CircularProgressIndicator()),
         ),
       )
     );

@@ -13,6 +13,25 @@ enum BlocStatus {
   init
 }
 
+/// Enum Status info for information
+enum StatusInfo {
+  error, warning, succes, loading, init, send
+}
+
+class Status {
+  Status({
+    this.statusInfo,
+    this.message
+  });
+  final StatusInfo statusInfo;
+  final String message;
+
+  factory Status.init() => Status(
+    statusInfo: StatusInfo.init,
+    message: ""
+  );
+}
+
 abstract class BaseBloc<T> {
   void dispose();
 }
@@ -72,7 +91,7 @@ class Bloc<T> extends BaseBloc {
   /// Get success [BlocState] data when error
   BlocState<T> getError(String errorMessage) => BlocState<T>( status: BlocStatus.error, message: errorMessage );
 
-  void setStatusWithData(BlocStatus status, T data) => sink.add(BlocState<T>(status: status, message: "", data: data));
+  void setStatusWithData(BlocStatus status, T data, [String message = ""]) => sink.add(BlocState<T>(status: status, message: message, data: data));
 
   /// Simplified body for code, for not much boiler plate
   /// 
