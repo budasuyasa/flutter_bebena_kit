@@ -74,16 +74,17 @@ class AuthAPI extends BaseAPI {
   @override
   Future<Map<String, dynamic>> postToApiUsingDio(String url, {Map<String, dynamic> postParameters, Map<String, String> headers}) async {
     headers = _appendWithAuth(headers);
-    headers['Content-Type']   = "application/x-www-form-urlencoded";
+    headers['content-type']   = "multipart/form-data";
 
     DIO.Dio dio = DIO.Dio();
 
     DIO.FormData body = postParameters != null ? DIO.FormData.fromMap(postParameters) : null;
 
     try {
+      
       var response = await dio.post(
         baseUrl(url),
-        data: body,
+        data: postParameters,
         options: DIO.Options(
           method: "POST",
           headers: headers
@@ -97,7 +98,7 @@ class AuthAPI extends BaseAPI {
         throw CustomException(_response['message']);
       }
     } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : "Error: " + e.toString());
     }
   }
 

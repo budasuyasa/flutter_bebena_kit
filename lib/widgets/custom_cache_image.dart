@@ -52,7 +52,7 @@ class CustomCacheImage extends StatelessWidget {
           imageUrl    : urlImage,
           fit         : fit ?? BoxFit.cover,
           errorWidget: (context, url, error) {
-            return Center(child: Label("Tidak dapat mengambil gambar"));
+            return Center(child: Label("Tidak dapat mengambil gambar", fontSize: 10));
           },
         ),
       );

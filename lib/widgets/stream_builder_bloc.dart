@@ -52,6 +52,7 @@ class StreamBuilderBloc<T> extends StatelessWidget {
     return StreamBuilder<BlocState<T>>(
       stream: stream,
       builder: (BuildContext context, AsyncSnapshot<BlocState<T>> snap) {
+
         if (snap.hasError) {
           return EmptyPlaceholder(
             message: snap.error,

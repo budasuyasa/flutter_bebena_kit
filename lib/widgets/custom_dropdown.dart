@@ -21,6 +21,7 @@ class CustomDropdown extends FormField<String> {
     onSaved: onSaved,
     validator: validator,
     builder: (FormFieldState formState) {
+      formState.setValue(value);
       if (value == null) value = dropdownItem[0].value;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +36,7 @@ class CustomDropdown extends FormField<String> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Label(title, type: LabelType.captionLower, color: Theme.of(context).accentColor, marginBottom: 4),
+                Label(title ?? "", type: LabelType.captionLower, color: Theme.of(context).accentColor, marginBottom: 4),
                 DropdownButton<String>(
                   isExpanded: true,
                   value: value,

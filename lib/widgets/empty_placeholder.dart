@@ -11,7 +11,8 @@ class EmptyPlaceholder extends StatelessWidget {
     this.image  = Images.sad,
     this.actionText,
     this.onActionTap,
-    this.withCentered = true
+    this.withCentered = true,
+    this.width = 60
   });
 
   final String title;
@@ -21,14 +22,17 @@ class EmptyPlaceholder extends StatelessWidget {
   final String actionText;
   final OnActionTap onActionTap;
 
+  final double width;
+
   /// Set placeholder with center depending of height
   final bool withCentered;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(16.0),
       width: double.infinity,
-      height: (withCentered) ? MediaQuery.of(context).size.height : null,
+      height: (withCentered) ? (MediaQuery.of(context).size.height) : null,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -36,10 +40,13 @@ class EmptyPlaceholder extends StatelessWidget {
             if (image != null) 
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                child: Image.asset(image, width: 60, height: 60, fit: BoxFit.contain)
+                child: Image.asset(image, width: width, height: 60, fit: BoxFit.contain)
               ),
-            Label(title, type: LabelType.subtitle1, fontWeight: FontWeight.bold),
-            SizedBox(height: 8),
+            if (title.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8.0),
+                child: Label(title, type: LabelType.subtitle1, fontWeight: FontWeight.bold)
+              ),
             Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyText2),
             if (actionText != null && onActionTap != null)
               Container(
