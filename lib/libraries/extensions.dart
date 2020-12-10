@@ -60,6 +60,18 @@ extension DateTimeFormatter on DateTime {
   }
 }
 
+extension StringDateFormatter on String {
+  String toDateFormat({ String format = "d MMMM y HH:mm" }) {
+    if (this != null && this.isNotEmpty) {
+      var dateTime = DateTime.parse(this);
+      var formatter = DateFormat(format, 'id_ID');
+      return formatter.format(dateTime);
+    } else {
+      return "";
+    }
+  }
+}
+
 extension StringExt on String {
   String formatDate({ String format = "d MMMM y HH:mm" }) {
     if (this != null && this.isNotEmpty) {

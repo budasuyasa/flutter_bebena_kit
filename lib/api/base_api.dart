@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bebena_kit/exceptions/custom_exception.dart';
 import 'package:http/http.dart';
 
+typedef OnFileProgress = void Function(int, int);
+
 /// Configuration for api request
 class ConfigurationAPI {
   ConfigurationAPI({
@@ -13,7 +15,7 @@ class ConfigurationAPI {
     String developmentBaseUrl,
     String apiPrefixPath = "api",
     this.isProduction = true,
-    this.appVersion = "1.0"
+    this.appVersion = "1.0",
   }) {
     _baseUrl            = baseUrl;
     _developmentBaseUrl = developmentBaseUrl;
@@ -25,7 +27,7 @@ class ConfigurationAPI {
   String _apiPrefixPath;
   bool isProduction;
   final String appVersion;
-
+  
   String get apiUrl {
     String prefixPath = _apiPrefixPath.endsWith('/') ? _apiPrefixPath : _apiPrefixPath + '/';
     if (isProduction) {
@@ -157,7 +159,7 @@ abstract class BaseAPI {
   /// 
   /// See Also:
   ///   * [AuthApi.postToApi]
-  Future<Map<String, dynamic>> postToApiUsingDio(String url, { Map<String, dynamic> postParameters, Map<String, String> headers }) async {
+  Future<Map<String, dynamic>> postToApiUsingDio(String url, { Map<String, dynamic> postParameters, Map<String, String> headers, OnFileProgress progress }) async {
     DIO.Dio dio = DIO.Dio();
 
     DIO.FormData body = postParameters != null ? DIO.FormData.fromMap(postParameters) : null;
@@ -169,7 +171,8 @@ abstract class BaseAPI {
         options: DIO.Options(
           method: "POST",
           headers: headers
-        )
+        ),
+        onSendProgress: progress
       );
 
       var _response = response.data;

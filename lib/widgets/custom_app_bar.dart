@@ -9,7 +9,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.bottom,
     this.backgroundColor,
     this.leadingImage,
-    this.elevation = 2
+    this.elevation = 2,
+    this.leading
   });
 
   final String title;
@@ -17,14 +18,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color backgroundColor;
   final String leadingImage;
   final double elevation;
+  final Widget leading;
 
   @override
   Widget build(BuildContext context) {
     Widget titleWidget;
-    if (leadingImage != null) {
+    if (leadingImage != null && leading == null) {
       titleWidget = Row(
         children: [
           Image.asset(leadingImage, width: 20, height: 20, fit: BoxFit.contain),
+          SizedBox(width: 16.0),
+          Label(title, type: LabelType.headline6)
+        ],
+      );
+    } else if (leadingImage == null && leading != null) {
+      titleWidget = Row(
+        children: [
+          SizedBox(child: leading, width: 24, height: 24),
           SizedBox(width: 16.0),
           Label(title, type: LabelType.headline6)
         ],
@@ -38,7 +48,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         color: Theme.of(context).accentColor
       ),
       title: titleWidget,
-      backgroundColor: backgroundColor ?? Theme.of(context).backgroundColor,
+      backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
       elevation: elevation,
     );
   }

@@ -166,7 +166,7 @@ class BlocBroadcast<T> extends BaseBloc {
   ///   return FormatingApiResponse.fromMap(response);
   /// });
   /// ```
-  void runBloc(RenderBody<T> body) async {
+  Future<void> runBloc(RenderBody<T> body) async {
     loading = "";
     try {
       final data = await body();

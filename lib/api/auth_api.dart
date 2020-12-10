@@ -4,7 +4,7 @@ import 'package:flutter_bebena_kit/exceptions/custom_exception.dart';
 import 'package:http/http.dart';
 
 class AuthAPI extends BaseAPI {
-  AuthAPI(ConfigurationAPI configurationAPI, { this.accessToken }) : super(configurationAPI);
+  AuthAPI(ConfigurationAPI config, { this.accessToken }) : super(config);
 
   String accessToken;
 
@@ -51,6 +51,28 @@ class AuthAPI extends BaseAPI {
         body: body,
         headers: headers
       );
+      print(response.body);
+      return checkingResponse(response);
+    } catch (e) {
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> putToApi(String path, {
+    Map<String, String> postParameters,
+    Map<String, String> headers
+  }) async {
+    headers = _appendWithAuth(headers);
+    headers['Content-Type']   = "application/x-www-form-urlencoded";
+
+    String body = (postParameters != null) ? fromMapToFormUrlEncoded(postParameters) : null;
+
+    try {
+      final response = await put(
+        baseUrl(path),
+        body: body,
+        headers: headers
+      );
       return checkingResponse(response);
     } catch (e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -72,22 +94,24 @@ class AuthAPI extends BaseAPI {
   }
 
   @override
-  Future<Map<String, dynamic>> postToApiUsingDio(String url, {Map<String, dynamic> postParameters, Map<String, String> headers}) async {
+  Future<Map<String, dynamic>> postToApiUsingDio(String url, {Map<String, dynamic> postParameters, Map<String, String> headers, OnFileProgress progress}) async {
     headers = _appendWithAuth(headers);
-    headers['Content-Type']   = "application/x-www-form-urlencoded";
+    headers[DIO.Headers.contentTypeHeader]   = 'multipart/form-data';
 
     DIO.Dio dio = DIO.Dio();
 
     DIO.FormData body = postParameters != null ? DIO.FormData.fromMap(postParameters) : null;
 
     try {
+      
       var response = await dio.post(
         baseUrl(url),
         data: body,
         options: DIO.Options(
           method: "POST",
           headers: headers
-        )
+        ),
+        onSendProgress: progress
       );
 
       var _response = response.data;
@@ -97,7 +121,7 @@ class AuthAPI extends BaseAPI {
         throw CustomException(_response['message']);
       }
     } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : "Error: " + e.toString());
     }
   }
 

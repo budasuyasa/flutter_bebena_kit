@@ -52,6 +52,7 @@ class StreamBuilderBloc<T> extends StatelessWidget {
     return StreamBuilder<BlocState<T>>(
       stream: stream,
       builder: (BuildContext context, AsyncSnapshot<BlocState<T>> snap) {
+
         if (snap.hasError) {
           return EmptyPlaceholder(
             message: snap.error,
@@ -74,8 +75,6 @@ class StreamBuilderBloc<T> extends StatelessWidget {
               child: Center(child: CircularProgressIndicator())
             );
           }
-
-          print(snap.data.status);
 
           if (snap.data == null) {
             return Container(

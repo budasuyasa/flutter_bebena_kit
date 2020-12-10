@@ -1,5 +1,18 @@
 // Author Agus Widhiyasa
 
+import 'package:flutter/foundation.dart';
+
+class DateCompareValidator {
+  DateCompareValidator({
+    @required this.dateToCompare,
+    @required this.fieldNameCompared
+  });
+  final String dateToCompare;
+  final String fieldNameCompared;
+
+  DateTime get date => DateTime.parse(dateToCompare);
+}
+
 /// Input validator for simply validating Input
 /// 
 /// Example Usage:
@@ -52,7 +65,9 @@ class InputValidator {
 
       // Same field value
       String sameValueAsField = "",
-      String sameValueAs      = ""
+      String sameValueAs      = "",
+
+      DateCompareValidator beforeDate
     }
   ) {
     if (input == null) {
@@ -63,7 +78,7 @@ class InputValidator {
 
     int inputLength = input.length;
 
-    if (isRequired && input.isEmpty) return "$fieldName tidak boleh kosong";
+    if (isRequired && (input == null || input.isEmpty)) return "$fieldName tidak boleh kosong";
 
     if (isNumber) {
       var reg = RegExp("^[0-9]*\$");
@@ -98,7 +113,18 @@ class InputValidator {
           return "$fieldName tidak boleh kurang dari $minLength karakter";
     }
 
-    
+    if (beforeDate != null) {
+      // parse input as date
+      try {
+        DateTime inputAsDate = DateTime.parse(input);
+        int differenceInDays = inputAsDate.difference(beforeDate.date).inDays;
+        if (differenceInDays <= 0) {
+          return "$fieldName harus lebih kecil dari ${beforeDate.fieldNameCompared}";
+        }
+      } catch (e) {
+        print("Cant parse string as date");
+      }
+    }
 
     if (maxLength > 0 && inputLength > maxLength)
       return "$fieldName tidak boleh lebih dari $maxLength karakter";

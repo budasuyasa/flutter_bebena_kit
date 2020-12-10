@@ -6,6 +6,9 @@ class Helpers {
 
   static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
 
+  /// Checking if the screen smaller than 320
+  static bool isSmallScreen(BuildContext context) => MediaQuery.of(context).size.width <= 320;
+
   /// Navigate to the [nextScreen]
   static Future navigateTo(BuildContext context, WidgetBuilder nextScreen, { bool fullscreenDialog = false }) =>
     Navigator.of(context).push(MaterialPageRoute(builder: nextScreen, fullscreenDialog: fullscreenDialog));
@@ -16,9 +19,12 @@ class Helpers {
     FocusScope.of(context).requestFocus(next);
   }
 
-  static void openUrl(String url) async {
+  static Future<void> openUrl(String url) async {
+    print('URL: $url');
     if (await canLaunch(url)) {
-      launch(url);
+      await launch(url);
+    } else {
+      print("Cant Launch $url");
     }
   }
 }
