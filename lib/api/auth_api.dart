@@ -106,7 +106,7 @@ class AuthAPI extends BaseAPI {
       
       var response = await dio.post(
         baseUrl(url),
-        data: body,
+        data: postParameters,
         options: DIO.Options(
           method: "POST",
           headers: headers
