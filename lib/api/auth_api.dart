@@ -51,7 +51,6 @@ class AuthAPI extends BaseAPI {
         body: body,
         headers: headers
       );
-      print(response.body);
       return checkingResponse(response);
     } catch (e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -106,14 +105,14 @@ class AuthAPI extends BaseAPI {
       
       var response = await dio.post(
         baseUrl(url),
-        data: postParameters,
+        data: body,
         options: DIO.Options(
           method: "POST",
           headers: headers
         ),
         onSendProgress: progress
       );
-
+      print(response.data);
       var _response = response.data;
       if (_response['status'] == 'success') {
         return _response;
@@ -121,6 +120,7 @@ class AuthAPI extends BaseAPI {
         throw CustomException(_response['message']);
       }
     } catch (e) {
+      print("Exception ${e.toString()}");
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : "Error: " + e.toString());
     }
   }

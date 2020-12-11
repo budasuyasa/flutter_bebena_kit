@@ -18,7 +18,7 @@ dependencies:
   url_launcher: ^5.1.4
   cached_network_image: ^2.2.0+1
   rxdart: ^0.24.1
-  # file_picker:
+  file_picker: ^2.1.1
   image_picker: ^0.6.2+1
   photo_view: ^0.5.0
 

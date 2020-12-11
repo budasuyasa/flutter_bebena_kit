@@ -29,3 +29,4 @@ export 'widgets/step_indicator.dart';
 export 'widgets/list_tile_with_time.dart';
 export 'widgets/collapsible.dart';
 export 'widgets/preview.dart';
+export 'widgets/custom_file_picker.dart';
