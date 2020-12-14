@@ -4,6 +4,7 @@ import 'package:flutter_bebena_kit/flutter_bebena.dart';
 class Collapsible extends StatefulWidget {
   Collapsible({
     @required this.title,
+    this.titleBoxDecoration,
     this.content,
     this.expand = false
   });
@@ -11,6 +12,8 @@ class Collapsible extends StatefulWidget {
   final Widget title;
   final Widget content;
   final bool expand;
+
+  final Decoration titleBoxDecoration;
 
   @override
   _CollapsibleState createState() => _CollapsibleState();
@@ -73,6 +76,7 @@ class _CollapsibleState extends State<Collapsible> with SingleTickerProviderStat
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 4.0),
+            decoration: widget.titleBoxDecoration,
             child: widget.title
           ),
         ),

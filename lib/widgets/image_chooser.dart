@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bebena_kit/flutter_bebena.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'label.dart';
@@ -255,7 +256,7 @@ class _ImageChooser extends State<ImageChooser> {
     } else if (widget.imageURL != null && _selectedImage == null) {
       return Stack(
         children: <Widget>[
-          Center(child: Image.network(widget.imageURL, fit: BoxFit.contain)),
+          Center(child: CustomCacheImage(widget.imageURL, size: Size(280, 200))),
         ],
       );
     } else if (_selectedImage == null && widget.file != null) {

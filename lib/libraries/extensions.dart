@@ -85,6 +85,9 @@ extension StringExt on String {
 
   /// Capitalize first letter of string
   String capitalize() {
+    if (this == null) {
+      return "";
+    }
     return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }
