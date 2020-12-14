@@ -119,7 +119,7 @@ class InputValidator {
         DateTime inputAsDate = DateTime.parse(input);
         int differenceInDays = inputAsDate.difference(beforeDate.date).inDays;
         if (differenceInDays <= 0) {
-          return "$fieldName harus lebih kecil dari ${beforeDate.fieldNameCompared}";
+          return "$fieldName harus lebih besar dari ${beforeDate.fieldNameCompared}";
         }
       } catch (e) {
         print("Cant parse string as date");

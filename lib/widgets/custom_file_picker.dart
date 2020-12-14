@@ -13,7 +13,9 @@ class CustomFilePicker extends StatefulWidget {
   CustomFilePicker({
     this.title,
     this.onFileSelected,
-    this.errorMessage
+    this.errorMessage,
+    this.subtitle,
+    this.allowedExtension
   });
 
   final String title;
@@ -21,6 +23,17 @@ class CustomFilePicker extends StatefulWidget {
 
   /// display [errorMessage]
   final String errorMessage;
+
+  /// Showing sub-information
+  final String subtitle;
+
+  /// [allowedExtension] file to be selected
+  /// 
+  /// example:
+  /// `['pdf', 'doc', 'docx', 'zip']`
+  /// 
+  /// see [FilePicker.allowedExtensions]
+  final List<String> allowedExtension;
 
   @override
   _CustomFilePickerState createState() => _CustomFilePickerState();
@@ -32,9 +45,10 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
 
   void _getFile(BuildContext context) async {
     FilePickerResult result = await FilePicker.platform.pickFiles(
-      // type: FileType.any,
+      type: widget.allowedExtension == null ? FileType.any : FileType.custom,
       allowMultiple: false,
       withData: true,
+      allowedExtensions: widget.allowedExtension
       // allowedExtensions: ["jpg", "png", "doc", "docx", "pdf"]
     );
 
@@ -83,6 +97,12 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
               Container(
                 margin: const EdgeInsets.only(top: 16),
                 child: Label(widget.errorMessage, color: Colors.red, fontSize: 12,),
+              ),
+
+            if (widget.subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Label(widget.subtitle, fontSize: 12, color: Colors.grey),
               )
           ],
         ),

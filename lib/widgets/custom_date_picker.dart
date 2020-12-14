@@ -60,13 +60,20 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+
+    InputDecoration inputDecoration = widget.decoration != null ? widget.decoration.copyWith(
+      errorMaxLines: 3
+    ) : InputDecoration(
+      errorMaxLines: 3
+    );
+
     return InkWell(
       onTap: () => _onDateSelected(),
       child: IgnorePointer(
         child: TextFormField(
           // initialValue: widget.initialValue,
           controller: _textController,
-          decoration: widget.decoration,
+          decoration: inputDecoration,
           validator: widget.validator,
           onSaved: widget.onSaved,
         ),
