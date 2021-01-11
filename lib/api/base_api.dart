@@ -68,6 +68,9 @@ abstract class BaseAPI {
 
   final ConfigurationAPI  configurationAPI;
 
+  OnInvalidToken onInvalidToken;
+  OnNetworkError onNetworkError;
+
   /// Concat base url with path
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
 
@@ -104,6 +107,7 @@ abstract class BaseAPI {
   /// jika kosong throw default [CustomException] 
   Map<String, dynamic> checkingResponse(Response response) {
     // if (!configuration.isProduction) print("JSON Response ${response.body}");
+    
     switch (response.statusCode) {
       case 200:
         var _response = json.decode(response.body);
@@ -114,7 +118,17 @@ abstract class BaseAPI {
         }
         break;
       case 401:
-        throw CustomException("Token Expired");
+        if (onInvalidToken != null)
+          onInvalidToken.onLogout(401, "Token Expired");
+        
+        return null;
+        break;
+      case 502:
+        if (onNetworkError != null)
+          onNetworkError.onBadGateway();
+        
+        return null;
+        break;
       default: 
         throw CustomException(ERR_NETWORK);
     }
@@ -142,6 +156,34 @@ abstract class BaseAPI {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
     }
   }
+
+  Future<Map<String, dynamic>> patchToApi(String path, {
+    Map<String, String> postParameters,
+    Map<String, String> customHeader
+  }) async {
+    String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
+    if (customHeader == null) customHeader = formEncodedHeader;
+    try {
+      final response = await patch(baseUrl(path), body: parameters, headers: customHeader);
+      return checkingResponse(response);
+    } catch(e) {
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteFromApi(String path, { Map<String, String> headers }) async {
+
+    try {
+      final response = await delete(
+        baseUrl(path),
+        headers: headers
+      );
+      return checkingResponse(response);
+    } catch (e) {
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+    }
+  }
+
 
   /// Custom post to api using [httpDio.Dio]
   /// 

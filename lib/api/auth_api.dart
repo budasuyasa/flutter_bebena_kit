@@ -1,16 +1,17 @@
 import 'package:dio/dio.dart' as DIO;
 import 'package:flutter_bebena_kit/api/base_api.dart';
-import 'package:flutter_bebena_kit/exceptions/custom_exception.dart';
-import 'package:http/http.dart';
 
-class AuthAPI extends BaseAPI {
-  AuthAPI(ConfigurationAPI config, { this.accessToken }) : super(config);
+class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
+  AuthAPI(ConfigurationAPI config, { this.accessToken }) : super(config) {
+    this.onInvalidToken = this;
+    // this.onNetworkError = this;
+  }
 
   String accessToken;
 
   OnInvalidToken onInvalidTokenDelegate;
-
   OnNetworkError onNetworkErrorDelegate;
+
 
   Map<String, String> _appendWithAuth(Map<String, String> map) {
     if (map == null) {
@@ -27,34 +28,14 @@ class AuthAPI extends BaseAPI {
 
   @override
   Future<Map<String, dynamic>> getFromApi(String path, {Map<String, String> header}) async {
-    try {
-      final response = await get(
-        baseUrl(path),
-        headers: _appendWithAuth(header)
-      );
-      return checkingResponse(response);
-    } catch(e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
-    }
+    return await super.getFromApi(path, header: _appendWithAuth(header));
   }
 
   @override
   Future<Map<String, dynamic>> postToApi(String path, {Map<String, String> postParameters, Map<String, String> headers}) async {
     headers = _appendWithAuth(headers);
     headers['Content-Type']   = "application/x-www-form-urlencoded";
-
-    String body = (postParameters != null) ? fromMapToFormUrlEncoded(postParameters) : null;
-
-    try {
-      final response = await post(
-        baseUrl(path),
-        body: body,
-        headers: headers
-      );
-      return checkingResponse(response);
-    } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
-    }
+    return await super.postToApi(path, postParameters: postParameters, headers: headers);
   }
 
   Future<Map<String, dynamic>> putToApi(String path, {
@@ -64,32 +45,23 @@ class AuthAPI extends BaseAPI {
     headers = _appendWithAuth(headers);
     headers['Content-Type']   = "application/x-www-form-urlencoded";
 
-    String body = (postParameters != null) ? fromMapToFormUrlEncoded(postParameters) : null;
-
-    try {
-      final response = await put(
-        baseUrl(path),
-        body: body,
-        headers: headers
-      );
-      return checkingResponse(response);
-    } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
-    }
+    return await super.postToApi(path, postParameters: postParameters, headers: headers);
   }
 
+  @override
+  Future<Map<String, dynamic>> patchToApi(String path, {
+    Map<String, String> postParameters,
+    Map<String, String> customHeader
+  }) async {
+    customHeader = _appendWithAuth(customHeader);
+    customHeader['Content-Type']   = "application/x-www-form-urlencoded";
+    return await super.patchToApi(path, postParameters: postParameters, customHeader: customHeader);
+  }
+
+  @override
   Future<Map<String, dynamic>> deleteFromApi(String path, { Map<String, String> headers }) async {
     headers = _appendWithAuth(headers);
-
-    try {
-      final response = await delete(
-        baseUrl(path),
-        headers: headers
-      );
-      return checkingResponse(response);
-    } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
-    }
+    return await super.deleteFromApi(path, headers: headers);
   }
 
   @override
@@ -97,46 +69,21 @@ class AuthAPI extends BaseAPI {
     headers = _appendWithAuth(headers);
     headers[DIO.Headers.contentTypeHeader]   = 'multipart/form-data';
 
-    DIO.Dio dio = DIO.Dio();
-
-    DIO.FormData body = postParameters != null ? DIO.FormData.fromMap(postParameters) : null;
-
-    try {
-      
-      var response = await dio.post(
-        baseUrl(url),
-        data: body,
-        options: DIO.Options(
-          method: "POST",
-          headers: headers
-        ),
-        onSendProgress: progress
-      );
-      print(response.data);
-      var _response = response.data;
-      if (_response['status'] == 'success') {
-        return _response;
-      } else {
-        throw CustomException(_response['message']);
-      }
-    } catch (e) {
-      print("Exception ${e.toString()}");
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : "Error: " + e.toString());
-    }
+    return await super.postToApiUsingDio(
+      url,
+      postParameters: postParameters,
+      headers: headers,
+      progress: progress
+    );
   }
 
   @override
-  Map<String, dynamic> checkingResponse(Response response) {
-    if (onNetworkErrorDelegate != null && response.statusCode == 502) {
-      onNetworkErrorDelegate.onBadGateway();
-      return null;
-    }
+  void onLogout(int statusCode, String message) {
+    onInvalidTokenDelegate.onLogout(statusCode, message);
+  }
 
-    if (onInvalidTokenDelegate != null && response.statusCode == 401) {
-      onInvalidTokenDelegate.onLogout(response.statusCode, "Logout");
-      return null;
-    }
-
-    return super.checkingResponse(response);
+  @override
+  void onBadGateway() {
+    onNetworkErrorDelegate.onBadGateway();
   }
 }

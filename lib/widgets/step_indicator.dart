@@ -8,7 +8,8 @@ class StepIndicator extends StatelessWidget {
     this.title,
     this.subTitle,
     this.enabled = true,
-    this.backgroundColor
+    this.backgroundColor,
+    this.icon = Icons.check
   });
 
   final int stepNumber;
@@ -16,6 +17,7 @@ class StepIndicator extends StatelessWidget {
   final String subTitle;
   final bool enabled;
   final Color backgroundColor;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class StepIndicator extends StatelessWidget {
               color: bgColor,
               borderRadius: CustomStyles.borderRadius(withBorderRadius: 10)
             ),
-            child: Icon(Icons.check, size: 16, color: Colors.white,),
+            child: Icon(icon, size: 16, color: Colors.white,),
             // child: Label(stepNumber.toString(), textAlign: TextAlign.center, color: Colors.white)
           ),
 
@@ -46,7 +48,8 @@ class StepIndicator extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Label(title, color: enabled ? Theme.of(context).accentColor : Colors.grey),
-                Label(subTitle, color: enabled ? Colors.grey : Colors.grey.shade300)
+                if (subTitle != null)
+                  Label(subTitle, color: enabled ? Colors.grey : Colors.grey.shade300)
               ],
             ),
           )

@@ -27,4 +27,11 @@ class Helpers {
       print("Cant Launch $url");
     }
   }
+
+  /// Checking if the [current] year, month, and day is same as [toCompare]
+  static bool isSameDay(DateTime current, DateTime toCompare) {
+    return current.year == toCompare.year &&
+      current.month == toCompare.month &&
+      current.day == toCompare.day;
+  }
 }

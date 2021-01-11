@@ -49,7 +49,6 @@ class _CustomFilePickerState extends State<CustomFilePicker> {
       allowMultiple: false,
       withData: true,
       allowedExtensions: widget.allowedExtension
-      // allowedExtensions: ["jpg", "png", "doc", "docx", "pdf"]
     );
 
     if (result != null) {
