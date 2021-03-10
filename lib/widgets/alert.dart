@@ -7,7 +7,8 @@ class Alert extends StatelessWidget {
 
   Alert(this.message, {
     this.alertType  = AlertType.info,
-    this.margin
+    this.margin,
+    this.compact = false
   });
 
   Alert.withIcon({
@@ -15,7 +16,8 @@ class Alert extends StatelessWidget {
     String title     = "",
     this.alertType  = AlertType.info,
     this.message,
-    this.margin
+    this.margin,
+    this.compact  = false
   }): _title = title, 
   _iconData = icon;
 
@@ -26,14 +28,14 @@ class Alert extends StatelessWidget {
     this.message,
     this.margin,
     String buttonText,
-    Function onButtonTap
+    Function onButtonTap,
+    this.compact = false
   }): _title = title,
   _iconData = icon,
   _buttonText = buttonText,
   _onButtonTap = onButtonTap;
 
   String _title;
-  String _message;
   IconData _iconData;
 
   String _buttonText;
@@ -50,6 +52,8 @@ class Alert extends StatelessWidget {
   ///   - [AlertType.warning] Warning with yellow background
   final AlertType alertType;
   final EdgeInsets margin;
+
+  final bool compact;
   
   @override
   Widget build(BuildContext context) {
@@ -79,7 +83,33 @@ class Alert extends StatelessWidget {
         break;
     }
 
-    Widget child = Label(message, color: textColor);
+    EdgeInsets padding = EdgeInsets.all(16.0);
+    double fontSize;
+    if (compact) {
+      padding = EdgeInsets.all(8.0);
+      fontSize = 12;
+    }
+
+    Widget child = Label(message, color: textColor, fontSize: fontSize);
+
+    Widget body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_title != null && _title.isNotEmpty)
+          Label(_title, color: darkenColor, type: LabelType.subtitle, marginBottom: 8.0),
+        
+        Label(message, color: textColor, fontSize: fontSize),
+
+        if (_buttonText != null && _buttonText.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            child: GestureDetector(
+              onTap: () => _onButtonTap(),
+              child: Label(_buttonText.toUpperCase(), type: LabelType.button, color: darkenColor),
+            ),
+          )
+      ],
+    );
 
     if (_iconData != null) {
       child = Row(
@@ -87,30 +117,16 @@ class Alert extends StatelessWidget {
           Icon(_iconData, color: darkenColor),
           SizedBox(width: 16.0),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_title != null && _title.isNotEmpty)
-                  Label(_title, color: darkenColor, type: LabelType.subtitle, marginBottom: 8.0),
-                Label(message, color: textColor),
-
-                if (_buttonText != null && _buttonText.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    child: GestureDetector(
-                      onTap: () => _onButtonTap(),
-                      child: Label(_buttonText.toUpperCase(), type: LabelType.button, color: darkenColor),
-                    ),
-                  )
-              ],
-            ),
+            child: body
           )
         ]
       );
+    } else {
+      child = body;
     }
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: padding,
       margin: margin ?? const EdgeInsets.symmetric(vertical: 16.0),
       decoration: BoxDecoration(
         color: boxColor,

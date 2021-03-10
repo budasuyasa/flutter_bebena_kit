@@ -50,6 +50,9 @@ class BottomButton extends StatelessWidget {
   final bool isLoading;
   final bool disabled;
 
+  /// The button with positioned element
+  bool _withPositioned = true;
+
   BottomButton({
     this.title, 
     this.onPress, 
@@ -57,6 +60,14 @@ class BottomButton extends StatelessWidget {
     this.color ,
     this.disabled = false
   });
+
+  BottomButton.withoutPositioned({
+    this.title, 
+    this.onPress, 
+    this.isLoading = false, 
+    this.color,
+    this.disabled = false
+  }) : _withPositioned = false;
 
   @override
   Widget build(BuildContext context) {
@@ -76,24 +87,30 @@ class BottomButton extends StatelessWidget {
       );
     }
 
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        decoration: decoration,
-        child: SafeArea(
-          top: false,
-          child: (!isLoading) ? MaterialButton(
-            onPressed: disabled ? null : () => onPress(),
-            disabledColor: Colors.grey.shade300,
-            color: Theme.of(context).accentColor,
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
-            child: Label(title == null ? "" : title.toUpperCase(), type: LabelType.button, color: Colors.white),
-          ) : Center(child: CircularProgressIndicator()),
-        ),
-      )
+    Widget child = Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      decoration: decoration,
+      child: SafeArea(
+        top: false,
+        child: (!isLoading) ? MaterialButton(
+          onPressed: disabled ? null : () => onPress(),
+          disabledColor: Colors.grey.shade300,
+          color: Theme.of(context).accentColor,
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Label(title == null ? "" : title.toUpperCase(), type: LabelType.button, color: Colors.white),
+        ) : Center(child: CircularProgressIndicator()),
+      ),
     );
+
+    if (_withPositioned) {
+      return Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: child
+      );
+    } else {
+      return child;
+    }
   }
 }

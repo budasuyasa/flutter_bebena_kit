@@ -21,6 +21,7 @@ class Label extends StatelessWidget {
   final FontWeight fontWeight;
   final textAlign;
   final bool withUnderline;
+  final TextDecoration textDecoration;
 
   Label(this.text, {
     this.margin,
@@ -31,7 +32,8 @@ class Label extends StatelessWidget {
     this.fontWeight,
     this.textAlign = TextAlign.start,
     this.maxLine,
-    this.withUnderline = false
+    this.withUnderline = false,
+    this.textDecoration
   });
 
   final int maxLine;
@@ -136,6 +138,9 @@ class Label extends StatelessWidget {
     if (withUnderline)
       style = style.copyWith(decoration: TextDecoration.underline);
 
+    if (textDecoration != null)
+      style = style.copyWith(decoration: textDecoration);
+
     EdgeInsets emargin = EdgeInsets.zero;
     if (marginBottom != null) {
       emargin = EdgeInsets.only(bottom: marginBottom);
@@ -145,7 +150,13 @@ class Label extends StatelessWidget {
 
     return Container(
       margin: emargin,
-      child: Text(textLabel, textAlign: textAlign, maxLines: maxLine ?? null, overflow: maxLine == null ? null : TextOverflow.ellipsis, style: style),
+      child: Text(
+        textLabel, 
+        textAlign: textAlign, 
+        maxLines: maxLine ?? null, 
+        overflow: maxLine == null ? null : TextOverflow.ellipsis, 
+        style: style
+      ),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart' as DIO;
 import 'package:flutter/foundation.dart';
@@ -8,14 +7,16 @@ import 'package:http/http.dart';
 
 typedef OnFileProgress = void Function(int, int);
 
-/// Configuration for api request
+enum DIOPostType { post, put, patch, delete }
+
+/// Configuration object for Networking
 class ConfigurationAPI {
   ConfigurationAPI({
     @required String baseUrl,
     String developmentBaseUrl,
-    String apiPrefixPath = "api",
-    this.isProduction = true,
-    this.appVersion = "1.0",
+    String apiPrefixPath      = "api",
+    this.isProduction         = true,
+    this.appVersion           = "1.0",
   }) {
     _baseUrl            = baseUrl;
     _developmentBaseUrl = developmentBaseUrl;
@@ -28,6 +29,7 @@ class ConfigurationAPI {
   bool isProduction;
   final String appVersion;
   
+  /// Return `String` of [baseUrl] with [apiPrefixPath]
   String get apiUrl {
     String prefixPath = _apiPrefixPath.endsWith('/') ? _apiPrefixPath : _apiPrefixPath + '/';
     if (isProduction) {
@@ -41,6 +43,7 @@ class ConfigurationAPI {
     }
   }
 
+  /// Get prodcution or development URL
   String get baseUrl {
     if (isProduction) {
       return _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
@@ -74,16 +77,16 @@ abstract class BaseAPI {
   /// Concat base url with path
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
 
-  /// Format [param] `Map<String, dynamic>` menjadi form __urlEncoded__
+  /// Format [param] to be form encoded `String`
   /// 
-  /// contoh dari:
+  /// Example:
   /// ```
   ///   var data = {
   ///     "data1": "value1",
   ///     "data2": "value2"
   ///   }
   /// ```
-  /// menjadi:
+  /// to:
   /// 
   /// `data1=value1&data2=value2`
   String fromMapToFormUrlEncoded(Map<String, String> param) {
@@ -96,17 +99,21 @@ abstract class BaseAPI {
     return parts.join("&");
   }
 
+  /// Additional header for POST based API request
   Map<String, String> get formEncodedHeader => {
     'Content-Type': 'application/x-www-form-urlencoded',
     'version': configurationAPI.appVersion
   };
-
-  /// Simplified [http.Response] checking.
+  
+  /// Checking [response] whenever its successfull or not. 
+  /// It will throwing [CustomException] when HTTP status code not 200
   /// 
-  /// Jika status response == 200 maka parsing data dan check status
-  /// jika kosong throw default [CustomException] 
-  Map<String, dynamic> checkingResponse(Response response) {
-    // if (!configuration.isProduction) print("JSON Response ${response.body}");
+  /// When imlementing [OnInvalidToken] or [OnNetworkError] the result will be 
+  /// overriden.
+  /// 
+  /// Sometimes we need [skipAuth] to fetch data without checking for invalid token
+  Map<String, dynamic> checkingResponse(Response response, { bool skipAuth = false }) {
+    // if (!configurationAPI.isProduction) print("JSON Response ${response.body}");
     
     switch (response.statusCode) {
       case 200:
@@ -118,31 +125,45 @@ abstract class BaseAPI {
         }
         break;
       case 401:
-        if (onInvalidToken != null)
+        if (onInvalidToken != null && !skipAuth)
           onInvalidToken.onLogout(401, "Token Expired");
         
-        return null;
+        throw CustomException(ERR_NETWORK);
         break;
       case 502:
         if (onNetworkError != null)
           onNetworkError.onBadGateway();
         
-        return null;
+        throw CustomException(ERR_NETWORK);
         break;
       default: 
         throw CustomException(ERR_NETWORK);
     }
   }
 
-  Future<Map<String, dynamic>> getFromApi(String path, { Map<String, String> header }) async {
+  /// Get data from API
+  /// 
+  /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
+  /// so its not needed to adding base path.
+  Future<Map<String, dynamic>> getFromApi(
+    String path, 
+    { 
+      Map<String, String> header,
+      bool skipAuth = false
+    }
+  ) async {
     try {
       final response = await get(baseUrl(path), headers: header);
-      return checkingResponse(response);
+      return checkingResponse(response, skipAuth: skipAuth);
     } catch (e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
     }
   }
 
+  /// POST data to API
+  /// 
+  /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
+  /// so its not needed to adding base path.
   Future<Map<String, dynamic>> postToApi(String path, {
     Map<String, String> postParameters,
     Map<String, String> headers
@@ -157,6 +178,28 @@ abstract class BaseAPI {
     }
   }
 
+  /// PUT data to API
+  /// 
+  /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
+  /// so its not needed to adding base path.
+  Future<Map<String, dynamic>> putToApi(String path, {
+    Map<String, String> postParameters,
+    Map<String, String> headers
+  }) async {
+    String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
+    if (headers == null) headers = formEncodedHeader;
+    try {
+      final response = await put(baseUrl(path), body: parameters, headers: headers);
+      return checkingResponse(response);
+    } catch(e) {
+      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+    }
+  }
+
+  /// Patch data on API
+  /// 
+  /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
+  /// so its not needed to adding base path.
   Future<Map<String, dynamic>> patchToApi(String path, {
     Map<String, String> postParameters,
     Map<String, String> customHeader
@@ -171,6 +214,10 @@ abstract class BaseAPI {
     }
   }
 
+  /// Delete data from API
+  /// 
+  /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
+  /// so its not needed to adding base path.
   Future<Map<String, dynamic>> deleteFromApi(String path, { Map<String, String> headers }) async {
 
     try {
@@ -201,21 +248,51 @@ abstract class BaseAPI {
   /// 
   /// See Also:
   ///   * [AuthApi.postToApi]
-  Future<Map<String, dynamic>> postToApiUsingDio(String url, { Map<String, dynamic> postParameters, Map<String, String> headers, OnFileProgress progress }) async {
+  Future<Map<String, dynamic>> postToApiUsingDio(
+    String url, { 
+      Map<String, dynamic> postParameters, 
+      Map<String, String> headers, 
+      OnFileProgress progress,
+      DIOPostType type = DIOPostType.post
+    }
+  ) async {
+
     DIO.Dio dio = DIO.Dio();
 
     DIO.FormData body = postParameters != null ? DIO.FormData.fromMap(postParameters) : null;
 
     try {
-      var response = await dio.post(
-        baseUrl(url),
-        data: body,
-        options: DIO.Options(
-          method: "POST",
-          headers: headers
-        ),
-        onSendProgress: progress
-      );
+      var response;
+      switch (type) {
+        case DIOPostType.post:
+          response = await dio.post(
+            baseUrl(url),
+            data: body,
+            options: DIO.Options(
+              method: "POST",
+              headers: headers
+            ),
+            onSendProgress: progress
+          );
+          break;
+        case DIOPostType.put:
+          throw Exception("Not Implemented");
+          break;
+        case DIOPostType.patch:
+          response = await dio.patch(
+            baseUrl(url),
+            data: body,
+            options: DIO.Options(
+              method: "POST",
+              headers: headers
+            ),
+            onSendProgress: progress
+          );
+          break;
+        case DIOPostType.delete:
+          throw Exception("Not Implemented");
+          break;
+      }
 
       var _response = response.data;
       if (_response['status'] == 'success') {

@@ -13,6 +13,16 @@ class DateCompareValidator {
   DateTime get date => DateTime.parse(dateToCompare);
 }
 
+class YearComparator {
+  final int compareWithYear;
+  final String fieldCompareTo;
+
+  YearComparator({
+    this.compareWithYear, 
+    this.fieldCompareTo
+  });
+}
+
 /// Input validator for simply validating Input
 /// 
 /// Example Usage:
@@ -20,7 +30,6 @@ class DateCompareValidator {
 /// InputValidator.validate(value, "Field Name", isRequired: true, isEmail: true);
 /// ```
 class InputValidator {
-  InputValidator._();
 
   /// Validate input given [input] value, the error will displayed with [fieldName],
   /// 
@@ -67,7 +76,9 @@ class InputValidator {
       String sameValueAsField = "",
       String sameValueAs      = "",
 
-      DateCompareValidator beforeDate
+      DateCompareValidator beforeDate,
+
+      YearComparator greaterThanYear
     }
   ) {
     if (input == null) {
@@ -131,6 +142,14 @@ class InputValidator {
 
     if (inputLength > 0 && exactLength > 0 && inputLength != exactLength)
       return "$fieldName harus sama dengan $exactLength karakter";
+
+    if (greaterThanYear != null) {
+      // convert input to integer
+      int currentYear = int.parse(input);
+      if (currentYear < greaterThanYear.compareWithYear) {
+        return "$fieldName harus lebih besar dari ${greaterThanYear.fieldCompareTo}";
+      }
+    }
 
     return null;
   }

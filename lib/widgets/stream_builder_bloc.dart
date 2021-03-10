@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bebena_kit/bloc/bloc.dart';
 import 'package:flutter_bebena_kit/widgets/empty_placeholder.dart';
 
-typedef StreamBuilderBlocCallback<T> = Widget Function(BuildContext, T, BlocStatus, String);
+typedef StreamBuilderBlocCallback<T> = Widget Function(BuildContext context, T data, BlocStatus status, String message);
 typedef StreamBuilderBlocCustomError = Widget Function(String errorMessage);
 
 /// Stream Builder wrapper for Bloc

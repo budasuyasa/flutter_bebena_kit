@@ -21,7 +21,7 @@ enum StatusInfo {
 class Status {
   Status({
     this.statusInfo,
-    this.message
+    this.message    = ""
   });
   final StatusInfo statusInfo;
   final String message;
@@ -29,6 +29,14 @@ class Status {
   factory Status.init() => Status(
     statusInfo: StatusInfo.init,
     message: ""
+  );
+
+  Status copyWith({
+    StatusInfo statusInfo,
+    String message
+  }) => Status(
+    statusInfo: statusInfo ?? this.statusInfo,
+    message: message ?? this.message
   );
 }
 

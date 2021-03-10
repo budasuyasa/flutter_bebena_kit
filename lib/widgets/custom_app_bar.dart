@@ -52,7 +52,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: titleWidget,
       backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
       elevation: elevation,
-      actions: actions,
+      actions: actions == null ? null : actions,
     );
   }
 
@@ -134,9 +134,9 @@ class _FloatingAppBarState extends State<FloatingAppBar> {
                                 child: AnimatedOpacity(opacity: _opacity, duration: Duration(milliseconds: 1), child: widget.title,),
                               ),
                             ),
-                            trailing: Row(
+                            trailing: widget.actions == null ? null : Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: widget.actions,
+                              children: widget.actions == null ? null : widget.actions,
                             ),
                           ),
                         )

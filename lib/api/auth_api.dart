@@ -4,7 +4,7 @@ import 'package:flutter_bebena_kit/api/base_api.dart';
 class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
   AuthAPI(ConfigurationAPI config, { this.accessToken }) : super(config) {
     this.onInvalidToken = this;
-    // this.onNetworkError = this;
+    this.onNetworkError = this;
   }
 
   String accessToken;
@@ -27,8 +27,17 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
   }
 
   @override
-  Future<Map<String, dynamic>> getFromApi(String path, {Map<String, String> header}) async {
-    return await super.getFromApi(path, header: _appendWithAuth(header));
+  Future<Map<String, dynamic>> getFromApi(
+    String path, {
+      Map<String, String> header,
+      bool skipAuth = false
+    }
+  ) async {
+    return await super.getFromApi(
+      path, 
+      header: _appendWithAuth(header),
+      skipAuth: skipAuth
+    );
   }
 
   @override
@@ -45,7 +54,7 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
     headers = _appendWithAuth(headers);
     headers['Content-Type']   = "application/x-www-form-urlencoded";
 
-    return await super.postToApi(path, postParameters: postParameters, headers: headers);
+    return await super.putToApi(path, postParameters: postParameters, headers: headers);
   }
 
   @override
@@ -65,7 +74,14 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
   }
 
   @override
-  Future<Map<String, dynamic>> postToApiUsingDio(String url, {Map<String, dynamic> postParameters, Map<String, String> headers, OnFileProgress progress}) async {
+  Future<Map<String, dynamic>> postToApiUsingDio(
+    String url, {
+      Map<String, dynamic> postParameters, 
+      Map<String, String> headers, 
+      OnFileProgress progress,
+      DIOPostType type = DIOPostType.post
+    }
+  ) async {
     headers = _appendWithAuth(headers);
     headers[DIO.Headers.contentTypeHeader]   = 'multipart/form-data';
 
@@ -73,7 +89,26 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
       url,
       postParameters: postParameters,
       headers: headers,
-      progress: progress
+      progress: progress,
+    );
+  }
+
+  Future<Map<String, dynamic>> patchToApiUsingDio(
+    String url, {
+      Map<String, dynamic> postParameters, 
+      Map<String, String> headers, 
+      OnFileProgress progress,
+    }
+  ) async {
+    headers = _appendWithAuth(headers);
+    headers[DIO.Headers.contentTypeHeader]   = 'multipart/form-data';
+
+    return await super.postToApiUsingDio(
+      url,
+      postParameters: postParameters,
+      headers: headers,
+      progress: progress,
+      type: DIOPostType.patch
     );
   }
 
