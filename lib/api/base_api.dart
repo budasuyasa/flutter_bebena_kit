@@ -75,7 +75,10 @@ abstract class BaseAPI {
   OnNetworkError onNetworkError;
 
   /// Concat base url with path
+  @deprecated
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
+
+  Uri baseUri(String path) => Uri.http(configurationAPI.apiUrl, path);
 
   /// Format [param] to be form encoded `String`
   /// 
@@ -153,7 +156,7 @@ abstract class BaseAPI {
     }
   ) async {
     try {
-      final response = await get(baseUrl(path), headers: header);
+      final response = await get(baseUri(path), headers: header);
       return checkingResponse(response, skipAuth: skipAuth);
     } catch (e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -171,7 +174,7 @@ abstract class BaseAPI {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
     if (headers == null) headers = formEncodedHeader;
     try {
-      final response = await post(baseUrl(path), body: parameters, headers: headers);
+      final response = await post(baseUri(path), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -189,7 +192,7 @@ abstract class BaseAPI {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
     if (headers == null) headers = formEncodedHeader;
     try {
-      final response = await put(baseUrl(path), body: parameters, headers: headers);
+      final response = await put(baseUri(path), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -207,7 +210,7 @@ abstract class BaseAPI {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
     if (customHeader == null) customHeader = formEncodedHeader;
     try {
-      final response = await patch(baseUrl(path), body: parameters, headers: customHeader);
+      final response = await patch(baseUri(path), body: parameters, headers: customHeader);
       return checkingResponse(response);
     } catch(e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -222,7 +225,7 @@ abstract class BaseAPI {
 
     try {
       final response = await delete(
-        baseUrl(path),
+        baseUri(path),
         headers: headers
       );
       return checkingResponse(response);
