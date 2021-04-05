@@ -16,7 +16,7 @@ class CustomDropdown extends FormField<String> {
     String                      value,
     /// Change callback to make value change on selected dropdown
     ValueChanged<String>        onValueChanged
-  }): assert(dropdownItem.length > 1, "Dropdown must have minimum of one item"), 
+  }): //assert(dropdownItem.length  1, "Dropdown must have minimum of one item"), 
   super(
     onSaved: onSaved,
     validator: validator,

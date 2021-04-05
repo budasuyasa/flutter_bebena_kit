@@ -13,6 +13,10 @@ class CustomWrapper extends StatefulWidget {
 
   final Function onWrapperTap;
 
+  final ScrollController scrollController;
+
+  final double bottomMargin;
+
   CustomWrapper({
     Key key,
     this.child,
@@ -20,7 +24,9 @@ class CustomWrapper extends StatefulWidget {
     this.appBar,
 
     this.padding,
-    this.onWrapperTap
+    this.onWrapperTap,
+    this.scrollController,
+    this.bottomMargin
   }): super(key: key);
 
   @override
@@ -45,10 +51,13 @@ class _CustomWrapperState extends State<CustomWrapper> {
         children: [
 
           Positioned.fill(child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Padding(
-              padding: widget.padding ?? EdgeInsets.zero,
-              child: widget.child,
+            controller: widget.scrollController ?? _scrollController,
+            child: Container(
+              margin: (widget.bottomMargin != null) ? EdgeInsets.only(bottom: widget.bottomMargin) : EdgeInsets.zero,
+              child: Padding(
+                padding: widget.padding ?? EdgeInsets.zero,
+                child: widget.child,
+              ),
             ),
           )),
 
@@ -57,7 +66,7 @@ class _CustomWrapperState extends State<CustomWrapper> {
               top: 0,
               left: 0,
               right: 0,
-              child: widget.appBar(_scrollController),
+              child: widget.appBar(widget.scrollController ?? _scrollController),
             ),
 
           if (widget.bottomWidget != null)
