@@ -29,22 +29,28 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
   @override
   Future<Map<String, dynamic>> getFromApi(
     String path, {
+      Map<String, String> queryParameter,
       Map<String, String> header,
       bool skipAuth = false
     }
   ) async {
     return await super.getFromApi(
       path, 
+      queryParameter: queryParameter,
       header: _appendWithAuth(header),
       skipAuth: skipAuth
     );
   }
 
   @override
-  Future<Map<String, dynamic>> postToApi(String path, {Map<String, String> postParameters, Map<String, String> headers}) async {
+  Future<Map<String, dynamic>> postToApi(String path, {
+    Map<String, String> postParameters, 
+    Map<String, String> headers,
+    Map<String, String> queryParameters
+  }) async {
     headers = _appendWithAuth(headers);
     headers['Content-Type']   = "application/x-www-form-urlencoded";
-    return await super.postToApi(path, postParameters: postParameters, headers: headers);
+    return await super.postToApi(path, queryParameters: queryParameters, postParameters: postParameters, headers: headers);
   }
 
   Future<Map<String, dynamic>> putToApi(String path, {

@@ -17,7 +17,8 @@ class ConfigurationAPI {
     String apiPrefixPath      = "api",
     this.isProduction         = true,
     this.appVersion           = "1.0",
-  }) {
+    this.secureUrl            = false
+  }): assert(!baseUrl.contains("http") || !baseUrl.contains("https"), "Tidak perlu http/https") {
     _baseUrl            = baseUrl;
     _developmentBaseUrl = developmentBaseUrl;
     _apiPrefixPath      = apiPrefixPath;
@@ -28,19 +29,27 @@ class ConfigurationAPI {
   String _apiPrefixPath;
   bool isProduction;
   final String appVersion;
+  final bool secureUrl;
   
   /// Return `String` of [baseUrl] with [apiPrefixPath]
   String get apiUrl {
+    // add http or https
+    String httpPrefix = secureUrl ? "https://" : "http://";
+
     String prefixPath = _apiPrefixPath.endsWith('/') ? _apiPrefixPath : _apiPrefixPath + '/';
+
+    String url = "";
     if (isProduction) {
-      return _baseUrl.endsWith('/') ? _baseUrl + prefixPath : "$_baseUrl/$prefixPath";
+      url = _baseUrl.endsWith('/') ? _baseUrl + prefixPath : "$_baseUrl/$prefixPath";
     } else {
       if (_developmentBaseUrl == null) {
-        return _baseUrl.endsWith('/') ? _baseUrl + prefixPath : "$_baseUrl/$prefixPath";
+        url = _baseUrl.endsWith('/') ? _baseUrl + prefixPath : "$_baseUrl/$prefixPath";
       } else {
-        return _developmentBaseUrl.endsWith('/') ? _developmentBaseUrl + prefixPath : "$_developmentBaseUrl/$prefixPath";
+        url = _developmentBaseUrl.endsWith('/') ? _developmentBaseUrl + prefixPath : "$_developmentBaseUrl/$prefixPath";
       }
     }
+
+    return httpPrefix + url;
   }
 
   /// Get prodcution or development URL
@@ -78,7 +87,25 @@ abstract class BaseAPI {
   @deprecated
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
 
-  Uri baseUri(String path) => Uri.http(configurationAPI.apiUrl, path);
+  Uri baseUri(String path, [ Map<String, dynamic> queryParameters ]) {
+    String basePath = configurationAPI.baseUrl.replaceFirst("/", "");
+
+    String apiPrefix = configurationAPI._apiPrefixPath.contains("/")
+      ? configurationAPI._apiPrefixPath
+      : configurationAPI._apiPrefixPath + '/';
+
+    final uri = configurationAPI.secureUrl ? Uri.https(
+      basePath, 
+      (apiPrefix + path),
+      queryParameters
+    ) : Uri.http(
+      basePath, 
+      (apiPrefix + path),
+      queryParameters
+    );
+
+    return uri;
+  } 
 
   /// Format [param] to be form encoded `String`
   /// 
@@ -151,12 +178,13 @@ abstract class BaseAPI {
   Future<Map<String, dynamic>> getFromApi(
     String path, 
     { 
+      Map<String, String> queryParameter,
       Map<String, String> header,
       bool skipAuth = false
     }
   ) async {
     try {
-      final response = await get(baseUri(path), headers: header);
+      final response = await get(baseUri(path, queryParameter), headers: header);
       return checkingResponse(response, skipAuth: skipAuth);
     } catch (e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
@@ -169,12 +197,13 @@ abstract class BaseAPI {
   /// so its not needed to adding base path.
   Future<Map<String, dynamic>> postToApi(String path, {
     Map<String, String> postParameters,
-    Map<String, String> headers
+    Map<String, String> headers,
+    Map<String, String> queryParameters
   }) async {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
     if (headers == null) headers = formEncodedHeader;
     try {
-      final response = await post(baseUri(path), body: parameters, headers: headers);
+      final response = await post(baseUri(path, queryParameters), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
       throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
