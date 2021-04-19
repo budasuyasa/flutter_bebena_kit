@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test("Testing Configutation API production", () {
     var configuration = ConfigurationAPI(
-      baseUrl: "http://aguswidhiyasa.com",
+      baseUrl: "aguswidhiyasa.com",
     );
 
     expect("http://aguswidhiyasa.com/api/", configuration.apiUrl);
@@ -13,7 +13,7 @@ void main() {
 
   test("Testing configuration with trailing /", () {
     var configuration = ConfigurationAPI(
-      baseUrl: "http://aguswidhiyasa.com/"
+      baseUrl: "aguswidhiyasa.com/"
     );
 
     expect("http://aguswidhiyasa.com/api/", configuration.apiUrl);
@@ -22,7 +22,7 @@ void main() {
 
   test("Testing configuration api development null", () {
     var configuration = ConfigurationAPI(
-      baseUrl: "http://aguswidhiyasa.com",
+      baseUrl: "aguswidhiyasa.com",
       isProduction: false
     );
 
@@ -30,10 +30,19 @@ void main() {
     expect("http://aguswidhiyasa.com/", configuration.baseUrl);
   });
 
+  test("Testing configuration api Prefix", () {
+    var configuration = ConfigurationAPI(
+      baseUrl: "aguswidhiyasa.com",
+      apiPrefixPath: "api/v1"
+    );
+
+    expect("http://aguswidhiyasa.com/api/v1/", configuration.apiUrl);
+  });
+
   test("Testing configuration api development", () {
     var configuration = ConfigurationAPI(
-      baseUrl: "http://aguswidhiyasa.com",
-      developmentBaseUrl: "http://dev.aguswidhiyasa.com",
+      baseUrl: "aguswidhiyasa.com",
+      developmentBaseUrl: "dev.aguswidhiyasa.com",
       isProduction: false
     );
 

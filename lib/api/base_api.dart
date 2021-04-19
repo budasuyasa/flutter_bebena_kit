@@ -33,6 +33,8 @@ class ConfigurationAPI {
   
   /// Return `String` of [baseUrl] with [apiPrefixPath]
   String get apiUrl {
+    assert(!_baseUrl.contains("http"), "Http method is not required");
+
     // add http or https
     String httpPrefix = secureUrl ? "https://" : "http://";
 
@@ -54,15 +56,24 @@ class ConfigurationAPI {
 
   /// Get prodcution or development URL
   String get baseUrl {
+    assert(!_baseUrl.contains("http"), "Http method is not required");
+
+    // add http or https
+    String httpPrefix = secureUrl ? "https://" : "http://";
+
+    String url = "";
+
     if (isProduction) {
-      return _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
+      url = _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
     } else {
       if (_developmentBaseUrl == null) {
-        return _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
+        url = _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
       } else {
-        return _developmentBaseUrl.endsWith("/") ? _developmentBaseUrl : "$_developmentBaseUrl/";
+        url = _developmentBaseUrl.endsWith("/") ? _developmentBaseUrl : "$_developmentBaseUrl/";
       }
     }
+
+    return httpPrefix + url;
   }
 }
 
@@ -96,11 +107,11 @@ abstract class BaseAPI {
 
     final uri = configurationAPI.secureUrl ? Uri.https(
       basePath, 
-      (apiPrefix + path),
+      (apiPrefix + "/" + path),
       queryParameters
     ) : Uri.http(
       basePath, 
-      (apiPrefix + path),
+      (apiPrefix + "/" + path),
       queryParameters
     );
 

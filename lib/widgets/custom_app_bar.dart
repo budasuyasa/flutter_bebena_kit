@@ -30,7 +30,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Image.asset(leadingImage, width: 20, height: 20, fit: BoxFit.contain),
           SizedBox(width: 16.0),
-          Label(title, type: LabelType.headline6)
+          Expanded(child: Label(title, type: LabelType.headline6))
         ],
       );
     } else if (leadingImage == null && leading != null) {
@@ -38,7 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           SizedBox(child: leading, width: 24, height: 24),
           SizedBox(width: 16.0),
-          Label(title, type: LabelType.headline6)
+          Expanded(child: Label(title, type: LabelType.headline6))
         ],
       );
     } else {
