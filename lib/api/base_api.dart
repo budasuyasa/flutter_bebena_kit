@@ -1,83 +1,13 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart' as DIO;
-import 'package:flutter/foundation.dart';
+import 'package:flutter_bebena_kit/api/api_configuration.dart';
 import 'package:flutter_bebena_kit/exceptions/custom_exception.dart';
 import 'package:http/http.dart';
 
 typedef OnFileProgress = void Function(int, int);
 
 enum DIOPostType { post, put, patch, delete }
-
-const String ERR_NETWORK = "Terjadi Kesalahan Jaringan";
-
-/// Configuration object for Networking
-class ConfigurationAPI {
-  ConfigurationAPI({
-    @required String baseUrl,
-    String developmentBaseUrl,
-    String apiPrefixPath      = "api",
-    this.isProduction         = true,
-    this.appVersion           = "1.0",
-    this.secureUrl            = false
-  }): assert(!baseUrl.contains("http") || !baseUrl.contains("https"), "Tidak perlu http/https") {
-    _baseUrl            = baseUrl;
-    _developmentBaseUrl = developmentBaseUrl;
-    _apiPrefixPath      = apiPrefixPath;
-  }
-
-  String _baseUrl;
-  String _developmentBaseUrl;
-  String _apiPrefixPath;
-  bool isProduction;
-  final String appVersion;
-  final bool secureUrl;
-  
-  /// Return `String` of [baseUrl] with [apiPrefixPath]
-  String get apiUrl {
-    assert(!_baseUrl.contains("http"), "Http method is not required");
-
-    // add http or https
-    String httpPrefix = secureUrl ? "https://" : "http://";
-
-    String prefixPath = _apiPrefixPath.endsWith('/') ? _apiPrefixPath : _apiPrefixPath + '/';
-
-    String url = "";
-    if (isProduction) {
-      url = _baseUrl.endsWith('/') ? _baseUrl + prefixPath : "$_baseUrl/$prefixPath";
-    } else {
-      if (_developmentBaseUrl == null) {
-        url = _baseUrl.endsWith('/') ? _baseUrl + prefixPath : "$_baseUrl/$prefixPath";
-      } else {
-        url = _developmentBaseUrl.endsWith('/') ? _developmentBaseUrl + prefixPath : "$_developmentBaseUrl/$prefixPath";
-      }
-    }
-
-    return httpPrefix + url;
-  }
-
-  /// Get prodcution or development URL
-  String get baseUrl {
-    assert(!_baseUrl.contains("http"), "Http method is not required");
-
-    // add http or https
-    String httpPrefix = secureUrl ? "https://" : "http://";
-
-    String url = "";
-
-    if (isProduction) {
-      url = _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
-    } else {
-      if (_developmentBaseUrl == null) {
-        url = _baseUrl.endsWith("/") ? _baseUrl : "$_baseUrl/";
-      } else {
-        url = _developmentBaseUrl.endsWith("/") ? _developmentBaseUrl : "$_developmentBaseUrl/";
-      }
-    }
-
-    return httpPrefix + url;
-  }
-}
 
 /// Mixins untuk melakukan focre logout
 mixin OnInvalidToken {
@@ -89,38 +19,29 @@ mixin OnNetworkError {
 }
 
 abstract class BaseAPI {
-  BaseAPI(this.configurationAPI);
+  BaseAPI({
+    this.configurationAPI = const ConfigurationAPI(),
+    this.configurationURL
+  });
 
   final ConfigurationAPI  configurationAPI;
+  final ConfigurationURL  configurationURL;
 
   OnInvalidToken onInvalidToken;
   OnNetworkError onNetworkError;
 
-  /// Indicate whenever the body is JSON or its FormUrlEncoded
-  bool isJsonBody = false;
-
-  /// Because when response has error message 
-  /// it will throw exception with default message "Terjadi Kesalahan Jaringan"
-  /// 
-  /// If this set to `true`, instead default message it will show message 
-  /// from field `message` on Request reponse
-  bool overrideExceptionMessage = false;
-
-  /// Custom error message, when response code other than 200
-  String exceptionMessage = ERR_NETWORK;
-
   /// Concat base url with path
   @deprecated
-  String baseUrl(String path) => this.configurationAPI.apiUrl + path;
+  String baseUrl(String path) => this.configurationURL.apiUrl + path;
 
   Uri baseUri(String path, [ Map<String, dynamic> queryParameters ]) {
-    String baseURL = (configurationAPI.isProduction) 
-      ? configurationAPI._baseUrl
-      : configurationAPI._developmentBaseUrl;
+    String baseURL = (configurationURL.isProduction) 
+      ? configurationURL.baseURL
+      : configurationURL.developmentURL;
 
     String basePath = baseURL.replaceFirst("/", "");
 
-    String apiSuffix = configurationAPI._apiPrefixPath;
+    String apiSuffix = configurationURL.apiSuffixPath;
 
     // checking if first character contains `/`, when matched, remove it
     if (apiSuffix.substring(0, 1) == "/") {
@@ -131,7 +52,7 @@ abstract class BaseAPI {
       apiSuffix = apiSuffix.substring(0, apiSuffix.length - 1);
     }
 
-    final uri = configurationAPI.secureUrl ? Uri.https(
+    final uri = configurationURL.secureUrl ? Uri.https(
       basePath, 
       (apiSuffix + "/" + path),
       queryParameters
@@ -160,7 +81,7 @@ abstract class BaseAPI {
   /// but when `isJsonBody` is `true`, the data will be return
   /// as formated json [String]
   String bodyParameters(Map<String, String> param) {
-    if (isJsonBody) {
+    if (configurationAPI.isJsonBody) {
       return jsonEncode(param);
     } else {
       var parts = [];
@@ -177,7 +98,7 @@ abstract class BaseAPI {
   /// Additional header for POST based API request
   Map<String, String> get formEncodedHeader => {
     'Content-Type': 'application/x-www-form-urlencoded',
-    'version': configurationAPI.appVersion
+    'version': configurationURL.appVersion
   };
 
   Map<String, String> requestHeader() {
@@ -192,7 +113,7 @@ abstract class BaseAPI {
   /// 
   /// Sometimes we need [skipAuth] to fetch data without checking for invalid token
   Map<String, dynamic> checkingResponse(Response response, { bool skipAuth = false }) {
-    // if (!configurationAPI.isProduction) print("JSON Response ${response.body}");
+    // if (!configurationURL.isProduction) print("JSON Response ${response.body}");
     
     switch (response.statusCode) {
       case 200:
@@ -223,10 +144,10 @@ abstract class BaseAPI {
   }
 
   void _throwResponse(String message) {
-    if (overrideExceptionMessage) {
+    if (configurationAPI.overrideExceptionMessage) {
       throw CustomException(message);
     } else {
-      throw CustomException(configurationAPI.isProduction ? exceptionMessage : message);
+      throw CustomException(configurationURL.isProduction ? configurationAPI.exceptionMessage : message);
     }
   }
 

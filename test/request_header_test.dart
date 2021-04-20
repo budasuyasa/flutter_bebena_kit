@@ -1,25 +1,31 @@
+import 'package:flutter_bebena_kit/api/api_configuration.dart';
 import 'package:flutter_bebena_kit/api/base_api.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final configuration = ConfigurationAPI(
-  baseUrl: "aguswidhiyasa.com",
-  apiPrefixPath: "api/v1"
+final configuration = ConfigurationURL(
+  baseURL: "aguswidhiyasa.com",
+  apiSuffixPath: "api/v1"
 );
 
 class Api extends BaseAPI {
-  Api() : super(configuration);
+  Api() : super(
+    configurationURL :configuration
+  );
 }
 
-final configuration2 = ConfigurationAPI(
-  baseUrl: "aguswidhiyasa.com",
-  apiPrefixPath: "api/v1"
+final configuration2 = ConfigurationURL(
+  baseURL: "aguswidhiyasa.com",
+  apiSuffixPath: "api/v1"
 );
 
 class Api2 extends BaseAPI {
-  Api2() : super(configuration2);
-
-  @override
-  bool get isJsonBody => true;
+  Api2() : super(
+    configurationURL: configuration2,
+    configurationAPI: ConfigurationAPI(
+      isJsonBody: true,
+      overrideExceptionMessage: true
+    )
+  );
 
   @override
   Map<String, String> requestHeader() {
@@ -45,11 +51,5 @@ void main() {
     var rh = api.requestHeader();
 
     expect(rh["Content-Type"], 'application/json');
-  });
-
-  test("Checking if post parameters is json", () {
-    var api = Api2();
-
-    isNot(!api.isJsonBody);
   });
 }

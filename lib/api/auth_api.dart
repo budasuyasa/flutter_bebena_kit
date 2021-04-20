@@ -1,8 +1,17 @@
 import 'package:dio/dio.dart' as DIO;
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bebena_kit/api/api_configuration.dart';
 import 'package:flutter_bebena_kit/api/base_api.dart';
 
 class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
-  AuthAPI(ConfigurationAPI config, { this.accessToken }) : super(config) {
+  AuthAPI({ 
+    @required ConfigurationAPI configurationAPI, 
+    @required ConfigurationURL configurationURL,
+    this.accessToken 
+  }) : super(
+    configurationAPI: configurationAPI,
+    configurationURL: configurationURL
+  ) {
     this.onInvalidToken = this;
     this.onNetworkError = this;
   }
@@ -17,11 +26,11 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
     if (map == null) {
       return {
         'Authorization': "Bearer $accessToken",
-        'version': configurationAPI.appVersion
+        'version': configurationURL.appVersion
       };
     } else {
       map['Authorization']  = "Bearer $accessToken";
-      map['version']        = configurationAPI.appVersion;
+      map['version']        = configurationURL.appVersion;
       return map;
     }
   }

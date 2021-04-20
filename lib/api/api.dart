@@ -1,7 +1,14 @@
+import 'package:flutter_bebena_kit/api/api_configuration.dart';
 import 'package:flutter_bebena_kit/api/base_api.dart';
 
 class API extends BaseAPI implements OnNetworkError {
-  API(ConfigurationAPI configurationAPI) : super(configurationAPI) {
+  API({
+    ConfigurationURL configurationURL,
+    ConfigurationAPI configurationAPI
+  }) : super(
+    configurationAPI: configurationAPI,
+    configurationURL: configurationURL
+  ) {
     this.onNetworkError = this;
   }
 
