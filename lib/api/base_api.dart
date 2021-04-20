@@ -9,6 +9,8 @@ typedef OnFileProgress = void Function(int, int);
 
 enum DIOPostType { post, put, patch, delete }
 
+const String ERR_NETWORK = "Terjadi Kesalahan Jaringan";
+
 /// Configuration object for Networking
 class ConfigurationAPI {
   ConfigurationAPI({
@@ -97,6 +99,16 @@ abstract class BaseAPI {
   /// Indicate whenever the body is JSON or its FormUrlEncoded
   bool isJsonBody = false;
 
+  /// Because when response has error message 
+  /// it will throw exception with default message "Terjadi Kesalahan Jaringan"
+  /// 
+  /// If this set to `true`, instead default message it will show message 
+  /// from field `message` on Request reponse
+  bool overrideExceptionMessage = false;
+
+  /// Custom error message, when response code other than 200
+  String exceptionMessage = ERR_NETWORK;
+
   /// Concat base url with path
   @deprecated
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
@@ -118,10 +130,6 @@ abstract class BaseAPI {
     if (apiSuffix.substring(apiSuffix.length - 1, apiSuffix.length) == "/") {
       apiSuffix = apiSuffix.substring(0, apiSuffix.length - 1);
     }
-
-    // String apiPrefix = configurationAPI._apiPrefixPath.replaceFirst("/", "");
-    //   // ? configurationAPI._apiPrefixPath
-    //   // : configurationAPI._apiPrefixPath + '/';
 
     final uri = configurationAPI.secureUrl ? Uri.https(
       basePath, 
@@ -214,6 +222,14 @@ abstract class BaseAPI {
     }
   }
 
+  void _throwResponse(String message) {
+    if (overrideExceptionMessage) {
+      throw CustomException(message);
+    } else {
+      throw CustomException(configurationAPI.isProduction ? exceptionMessage : message);
+    }
+  }
+
   /// Get data from API
   /// 
   /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
@@ -230,7 +246,8 @@ abstract class BaseAPI {
       final response = await get(baseUri(path, queryParameter), headers: header);
       return checkingResponse(response, skipAuth: skipAuth);
     } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      _throwResponse(e.toString());
+      return null;
     }
   }
 
@@ -249,7 +266,8 @@ abstract class BaseAPI {
       final response = await post(baseUri(path, queryParameters), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      _throwResponse(e.toString());
+      return null;
     }
   }
 
@@ -267,7 +285,8 @@ abstract class BaseAPI {
       final response = await put(baseUri(path), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      _throwResponse(e.toString());
+      return null;
     }
   }
 
@@ -285,7 +304,8 @@ abstract class BaseAPI {
       final response = await patch(baseUri(path), body: parameters, headers: customHeader);
       return checkingResponse(response);
     } catch(e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      _throwResponse(e.toString());
+      return null;
     }
   }
 
@@ -302,7 +322,8 @@ abstract class BaseAPI {
       );
       return checkingResponse(response);
     } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      _throwResponse(e.toString());
+      return null;
     }
   }
 
@@ -376,9 +397,8 @@ abstract class BaseAPI {
         throw CustomException(_response['message']);
       }
     } catch (e) {
-      throw CustomException(configurationAPI.isProduction ? ERR_NETWORK : e.toString());
+      _throwResponse(e.toString());
+      return null;
     }
   }
 }
-
-const String ERR_NETWORK = "Terjadi Kesalahan Jaringan";
