@@ -293,7 +293,15 @@ abstract class BaseAPI {
           );
           break;
         case DIOPostType.put:
-          throw Exception("Not Implemented");
+          response = await dio.put(
+            baseUrl(url),
+            data: body,
+            options: DIO.Options(
+              method: "PUT",
+              headers: headers
+            ),
+            onSendProgress: progress
+          );
           break;
         case DIOPostType.patch:
           response = await dio.patch(

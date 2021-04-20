@@ -105,6 +105,7 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
       postParameters: postParameters,
       headers: headers,
       progress: progress,
+      type: type
     );
   }
 
