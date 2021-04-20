@@ -101,17 +101,28 @@ abstract class BaseAPI {
   Uri baseUri(String path, [ Map<String, dynamic> queryParameters ]) {
     String basePath = configurationAPI._baseUrl.replaceFirst("/", "");
 
-    String apiPrefix = configurationAPI._apiPrefixPath.contains("/")
-      ? configurationAPI._apiPrefixPath
-      : configurationAPI._apiPrefixPath + '/';
+    String apiSuffix = configurationAPI._apiPrefixPath;
+
+    // checking if first character contains `/`, when matched, remove it
+    if (apiSuffix.substring(0, 1) == "/") {
+      apiSuffix = apiSuffix.substring(1);
+    }
+
+    if (apiSuffix.substring(apiSuffix.length - 1, apiSuffix.length) == "/") {
+      apiSuffix = apiSuffix.substring(0, apiSuffix.length - 1);
+    }
+
+    // String apiPrefix = configurationAPI._apiPrefixPath.replaceFirst("/", "");
+    //   // ? configurationAPI._apiPrefixPath
+    //   // : configurationAPI._apiPrefixPath + '/';
 
     final uri = configurationAPI.secureUrl ? Uri.https(
       basePath, 
-      (apiPrefix + "/" + path),
+      (apiSuffix + "/" + path),
       queryParameters
     ) : Uri.http(
       basePath, 
-      (apiPrefix + "/" + path),
+      (apiSuffix + "/" + path),
       queryParameters
     );
 
