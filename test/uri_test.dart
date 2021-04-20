@@ -9,7 +9,15 @@ final configuration = ConfigurationAPI(
 
 final configuration2 = ConfigurationAPI(
   baseUrl: "aguswidhiyasa.com",
+  developmentBaseUrl: "dev.aguswidhiyasa.com",
   apiPrefixPath: "/api/"
+);
+
+final configuration3 = ConfigurationAPI(
+  baseUrl: "aguswidhiyasa.com",
+  developmentBaseUrl: "dev.aguswidhiyasa.com",
+  apiPrefixPath: "/api/",
+  isProduction: false
 );
 
 class Api extends BaseAPI {
@@ -18,6 +26,10 @@ class Api extends BaseAPI {
 
 class Api2 extends BaseAPI {
   Api2(): super(configuration2);
+}
+
+class Api3 extends BaseAPI {
+  Api3(): super(configuration3);
 }
 
 void main() {
@@ -34,5 +46,12 @@ void main() {
     String path = api.baseUri("activity").toString();
 
     expect(path, "http://aguswidhiyasa.com/api/activity");
+  });
+
+  test("Development Uri Testing without suffix", () {
+    var api = Api3();
+    String path = api.baseUri("activity").toString();
+
+    expect(path, "http://dev.aguswidhiyasa.com/api/activity");
   });
 }

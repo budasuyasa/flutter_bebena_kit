@@ -99,7 +99,11 @@ abstract class BaseAPI {
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
 
   Uri baseUri(String path, [ Map<String, dynamic> queryParameters ]) {
-    String basePath = configurationAPI._baseUrl.replaceFirst("/", "");
+    String baseURL = (configurationAPI.isProduction) 
+      ? configurationAPI._baseUrl
+      : configurationAPI._developmentBaseUrl;
+
+    String basePath = baseURL.replaceFirst("/", "");
 
     String apiSuffix = configurationAPI._apiPrefixPath;
 
