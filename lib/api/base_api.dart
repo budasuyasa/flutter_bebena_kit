@@ -94,6 +94,9 @@ abstract class BaseAPI {
   OnInvalidToken onInvalidToken;
   OnNetworkError onNetworkError;
 
+  /// Indicate whenever the body is JSON or its FormUrlEncoded
+  bool isJsonBody = false;
+
   /// Concat base url with path
   @deprecated
   String baseUrl(String path) => this.configurationAPI.apiUrl + path;
@@ -145,14 +148,22 @@ abstract class BaseAPI {
   /// to:
   /// 
   /// `data1=value1&data2=value2`
-  String fromMapToFormUrlEncoded(Map<String, String> param) {
-    var parts = [];
-    param.forEach((key, val) {
-      parts.add(
-          '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(val)}');
-    });
+  /// 
+  /// but when `isJsonBody` is `true`, the data will be return
+  /// as formated json [String]
+  String bodyParameters(Map<String, String> param) {
+    if (isJsonBody) {
+      return jsonEncode(param);
+    } else {
+      var parts = [];
+      param.forEach((key, val) {
+        parts.add(
+            '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(val)}');
+      });
 
-    return parts.join("&");
+      return parts.join("&");
+    }
+    
   }
 
   /// Additional header for POST based API request
@@ -232,7 +243,7 @@ abstract class BaseAPI {
     Map<String, String> headers,
     Map<String, String> queryParameters
   }) async {
-    String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
+    String parameters = postParameters != null ? bodyParameters(postParameters) : null;
     if (headers == null) headers = requestHeader();
     try {
       final response = await post(baseUri(path, queryParameters), body: parameters, headers: headers);
@@ -250,7 +261,7 @@ abstract class BaseAPI {
     Map<String, String> postParameters,
     Map<String, String> headers
   }) async {
-    String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
+    String parameters = postParameters != null ? bodyParameters(postParameters) : null;
     if (headers == null) headers = requestHeader();
     try {
       final response = await put(baseUri(path), body: parameters, headers: headers);
@@ -268,7 +279,7 @@ abstract class BaseAPI {
     Map<String, String> postParameters,
     Map<String, String> customHeader
   }) async {
-    String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
+    String parameters = postParameters != null ? bodyParameters(postParameters) : null;
     if (customHeader == null) customHeader = requestHeader();
     try {
       final response = await patch(baseUri(path), body: parameters, headers: customHeader);

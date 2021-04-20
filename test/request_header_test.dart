@@ -19,6 +19,9 @@ class Api2 extends BaseAPI {
   Api2() : super(configuration2);
 
   @override
+  bool get isJsonBody => true;
+
+  @override
   Map<String, String> requestHeader() {
     return {
       'Content-Type': 'application/json',
@@ -42,5 +45,11 @@ void main() {
     var rh = api.requestHeader();
 
     expect(rh["Content-Type"], 'application/json');
+  });
+
+  test("Checking if post parameters is json", () {
+    var api = Api2();
+
+    isNot(!api.isJsonBody);
   });
 }
