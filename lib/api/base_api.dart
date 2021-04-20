@@ -160,6 +160,10 @@ abstract class BaseAPI {
     'Content-Type': 'application/x-www-form-urlencoded',
     'version': configurationAPI.appVersion
   };
+
+  Map<String, String> requestHeader() {
+    return this.formEncodedHeader;
+  }
   
   /// Checking [response] whenever its successfull or not. 
   /// It will throwing [CustomException] when HTTP status code not 200
@@ -229,7 +233,7 @@ abstract class BaseAPI {
     Map<String, String> queryParameters
   }) async {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
-    if (headers == null) headers = formEncodedHeader;
+    if (headers == null) headers = requestHeader();
     try {
       final response = await post(baseUri(path, queryParameters), body: parameters, headers: headers);
       return checkingResponse(response);
@@ -247,7 +251,7 @@ abstract class BaseAPI {
     Map<String, String> headers
   }) async {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
-    if (headers == null) headers = formEncodedHeader;
+    if (headers == null) headers = requestHeader();
     try {
       final response = await put(baseUri(path), body: parameters, headers: headers);
       return checkingResponse(response);
@@ -265,7 +269,7 @@ abstract class BaseAPI {
     Map<String, String> customHeader
   }) async {
     String parameters = postParameters != null ? fromMapToFormUrlEncoded(postParameters) : null;
-    if (customHeader == null) customHeader = formEncodedHeader;
+    if (customHeader == null) customHeader = requestHeader();
     try {
       final response = await patch(baseUri(path), body: parameters, headers: customHeader);
       return checkingResponse(response);
