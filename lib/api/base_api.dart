@@ -173,6 +173,7 @@ abstract class BaseAPI {
     
     switch (response.statusCode) {
       case 200:
+      case 400:
         var _response = json.decode(response.body);
         if (_response['status'] == 'success') {
           return _response;
@@ -180,6 +181,7 @@ abstract class BaseAPI {
           throw CustomException(_response['message']);
         }
         break;
+      
       case 401:
         if (onInvalidToken != null && !skipAuth)
           onInvalidToken.onLogout(401, "Token Expired");
