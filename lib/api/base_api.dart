@@ -5,6 +5,8 @@ import 'package:flutter_bebena_kit/api/api_configuration.dart';
 import 'package:flutter_bebena_kit/exceptions/custom_exception.dart';
 import 'package:http/http.dart';
 
+import '../exceptions/custom_exception.dart';
+
 typedef OnFileProgress = void Function(int, int);
 
 enum DIOPostType { post, put, patch, delete }
@@ -143,11 +145,15 @@ abstract class BaseAPI {
     }
   }
 
-  void _throwResponse(String message) {
+  void _throwResponse(String message, [ bool allowMessageFromServer = false]) {
     if (configurationAPI.overrideExceptionMessage) {
       throw CustomException(message);
     } else {
-      throw CustomException(configurationURL.isProduction ? configurationAPI.exceptionMessage : message);
+      if (allowMessageFromServer) {
+        throw CustomException(message);
+      } else {
+        throw CustomException(configurationURL.isProduction ? configurationAPI.exceptionMessage : message);
+      }
     }
   }
 
@@ -160,14 +166,15 @@ abstract class BaseAPI {
     { 
       Map<String, String> queryParameter,
       Map<String, String> header,
-      bool skipAuth = false
+      bool skipAuth = false,
+      bool allowMessageFromServer = false
     }
   ) async {
     try {
       final response = await get(baseUri(path, queryParameter), headers: header);
       return checkingResponse(response, skipAuth: skipAuth);
     } catch (e) {
-      _throwResponse(e.toString());
+      _throwResponse(e.toString(), allowMessageFromServer);
       return null;
     }
   }
@@ -179,7 +186,8 @@ abstract class BaseAPI {
   Future<Map<String, dynamic>> postToApi(String path, {
     Map<String, String> postParameters,
     Map<String, String> headers,
-    Map<String, String> queryParameters
+    Map<String, String> queryParameters,
+    bool allowMessageFromServer = false
   }) async {
     String parameters = postParameters != null ? bodyParameters(postParameters) : null;
     if (headers == null) headers = requestHeader();
@@ -187,7 +195,7 @@ abstract class BaseAPI {
       final response = await post(baseUri(path, queryParameters), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
-      _throwResponse(e.toString());
+      _throwResponse(e.toString(), allowMessageFromServer);
       return null;
     }
   }
@@ -198,7 +206,8 @@ abstract class BaseAPI {
   /// so its not needed to adding base path.
   Future<Map<String, dynamic>> putToApi(String path, {
     Map<String, String> postParameters,
-    Map<String, String> headers
+    Map<String, String> headers,
+    bool allowMessageFromServer = false
   }) async {
     String parameters = postParameters != null ? bodyParameters(postParameters) : null;
     if (headers == null) headers = requestHeader();
@@ -206,7 +215,7 @@ abstract class BaseAPI {
       final response = await put(baseUri(path), body: parameters, headers: headers);
       return checkingResponse(response);
     } catch(e) {
-      _throwResponse(e.toString());
+      _throwResponse(e.toString(), allowMessageFromServer);
       return null;
     }
   }
@@ -217,7 +226,8 @@ abstract class BaseAPI {
   /// so its not needed to adding base path.
   Future<Map<String, dynamic>> patchToApi(String path, {
     Map<String, String> postParameters,
-    Map<String, String> customHeader
+    Map<String, String> customHeader,
+    bool allowMessageFromServer = false
   }) async {
     String parameters = postParameters != null ? bodyParameters(postParameters) : null;
     if (customHeader == null) customHeader = requestHeader();
@@ -225,7 +235,7 @@ abstract class BaseAPI {
       final response = await patch(baseUri(path), body: parameters, headers: customHeader);
       return checkingResponse(response);
     } catch(e) {
-      _throwResponse(e.toString());
+      _throwResponse(e.toString(), allowMessageFromServer);
       return null;
     }
   }
@@ -234,7 +244,12 @@ abstract class BaseAPI {
   /// 
   /// The [path] for request URL will be appended with [ConfigurationAPI.apiUrl],
   /// so its not needed to adding base path.
-  Future<Map<String, dynamic>> deleteFromApi(String path, { Map<String, String> headers }) async {
+  Future<Map<String, dynamic>> deleteFromApi(
+    String path, { 
+        Map<String, String> headers,
+        bool allowMessageFromServer = false
+      }
+    ) async {
 
     try {
       final response = await delete(
@@ -243,7 +258,7 @@ abstract class BaseAPI {
       );
       return checkingResponse(response);
     } catch (e) {
-      _throwResponse(e.toString());
+      _throwResponse(e.toString(), allowMessageFromServer);
       return null;
     }
   }
@@ -270,7 +285,8 @@ abstract class BaseAPI {
       Map<String, dynamic> postParameters, 
       Map<String, String> headers, 
       OnFileProgress progress,
-      DIOPostType type = DIOPostType.post
+      DIOPostType type = DIOPostType.post,
+      bool allowMessageFromServer = false
     }
   ) async {
 
@@ -326,7 +342,7 @@ abstract class BaseAPI {
         throw CustomException(_response['message']);
       }
     } catch (e) {
-      _throwResponse(e.toString());
+      _throwResponse(e.toString(), allowMessageFromServer);
       return null;
     }
   }

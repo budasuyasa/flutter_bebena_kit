@@ -40,14 +40,16 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
     String path, {
       Map<String, String> queryParameter,
       Map<String, String> header,
-      bool skipAuth = false
+      bool skipAuth = false,
+      bool allowMessageFromServer = false
     }
   ) async {
     return await super.getFromApi(
       path, 
       queryParameter: queryParameter,
       header: _appendWithAuth(header),
-      skipAuth: skipAuth
+      skipAuth: skipAuth,
+      allowMessageFromServer: allowMessageFromServer
     );
   }
 
@@ -55,37 +57,65 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
   Future<Map<String, dynamic>> postToApi(String path, {
     Map<String, String> postParameters, 
     Map<String, String> headers,
-    Map<String, String> queryParameters
+    Map<String, String> queryParameters,
+    bool allowMessageFromServer = false
   }) async {
     headers = _appendWithAuth(headers);
     headers['Content-Type']   = "application/x-www-form-urlencoded";
-    return await super.postToApi(path, queryParameters: queryParameters, postParameters: postParameters, headers: headers);
+    return await super.postToApi(
+      path, 
+      queryParameters: queryParameters, 
+      postParameters: postParameters, 
+      headers: headers,
+      allowMessageFromServer: allowMessageFromServer
+    );
   }
 
   Future<Map<String, dynamic>> putToApi(String path, {
     Map<String, String> postParameters,
-    Map<String, String> headers
+    Map<String, String> headers,
+    bool allowMessageFromServer = false
   }) async {
     headers = _appendWithAuth(headers);
     headers['Content-Type']   = "application/x-www-form-urlencoded";
 
-    return await super.putToApi(path, postParameters: postParameters, headers: headers);
+    return await super.putToApi(
+      path, 
+      postParameters: postParameters, 
+      headers: headers,
+      allowMessageFromServer: allowMessageFromServer
+    );
   }
 
   @override
   Future<Map<String, dynamic>> patchToApi(String path, {
     Map<String, String> postParameters,
-    Map<String, String> customHeader
+    Map<String, String> customHeader,
+    bool allowMessageFromServer = false
   }) async {
     customHeader = _appendWithAuth(customHeader);
     customHeader['Content-Type']   = "application/x-www-form-urlencoded";
-    return await super.patchToApi(path, postParameters: postParameters, customHeader: customHeader);
+    return await super.patchToApi(
+      path, 
+      postParameters: postParameters, 
+      customHeader: customHeader,
+      allowMessageFromServer: allowMessageFromServer
+    );
   }
 
   @override
-  Future<Map<String, dynamic>> deleteFromApi(String path, { Map<String, String> headers }) async {
+  Future<Map<String, dynamic>> deleteFromApi(
+    String path, 
+    { 
+      Map<String, String> headers ,
+      bool allowMessageFromServer = false
+    }) async {
     headers = _appendWithAuth(headers);
-    return await super.deleteFromApi(path, headers: headers);
+    return await super.deleteFromApi(
+      path, 
+      headers: headers,
+      allowMessageFromServer: allowMessageFromServer
+    );
   }
 
   @override
@@ -94,7 +124,8 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
       Map<String, dynamic> postParameters, 
       Map<String, String> headers, 
       OnFileProgress progress,
-      DIOPostType type = DIOPostType.post
+      DIOPostType type = DIOPostType.post,
+      bool allowMessageFromServer = false
     }
   ) async {
     headers = _appendWithAuth(headers);
@@ -105,7 +136,8 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
       postParameters: postParameters,
       headers: headers,
       progress: progress,
-      type: type
+      type: type,
+      allowMessageFromServer: allowMessageFromServer
     );
   }
 
@@ -114,6 +146,7 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
       Map<String, dynamic> postParameters, 
       Map<String, String> headers, 
       OnFileProgress progress,
+      bool allowMessageFromServer = false
     }
   ) async {
     headers = _appendWithAuth(headers);
@@ -124,7 +157,8 @@ class AuthAPI extends BaseAPI implements OnInvalidToken, OnNetworkError {
       postParameters: postParameters,
       headers: headers,
       progress: progress,
-      type: DIOPostType.patch
+      type: DIOPostType.patch,
+      allowMessageFromServer: allowMessageFromServer
     );
   }
 
